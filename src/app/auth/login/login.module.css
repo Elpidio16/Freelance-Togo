@@ -1,0 +1,150 @@
+.page {
+    min-height: 100vh;
+    background: linear-gradient(180deg, #f0f7ff 0%, #ffffff 100%);
+    display: flex;
+    flex-direction: column;
+}
+
+.nav {
+    background: transparent;
+    padding: 1.5rem 0;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: 800;
+}
+
+.logoText {
+    color: var(--text-primary);
+}
+
+.logoAccent {
+    color: var(--primary-color);
+}
+
+.container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.loginCard {
+    background: white;
+    border-radius: var(--radius-xl);
+    padding: 3rem;
+    box-shadow: var(--shadow-lg);
+    max-width: 450px;
+    width: 100%;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+    text-align: center;
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+}
+
+.forgotPassword {
+    text-align: right;
+    margin-bottom: 1.5rem;
+}
+
+.link {
+    color: var(--primary-color);
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 0.875rem;
+}
+
+.link:hover {
+    text-decoration: underline;
+}
+
+.submitBtn {
+    width: 100%;
+}
+
+.divider {
+    position: relative;
+    text-align: center;
+    margin: 2rem 0;
+    color: var(--text-tertiary);
+    font-size: 0.875rem;
+}
+
+.divider::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 1px;
+    background: var(--border-color);
+}
+
+.divider span {
+    position: relative;
+    background: white;
+    padding: 0 1rem;
+}
+
+.socialButtons {
+    margin-bottom: 1.5rem;
+}
+
+.googleBtn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: white;
+    color: var(--text-primary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.googleBtn:hover {
+    border-color: var(--border-dark);
+    background: var(--bg-tertiary);
+}
+
+.registerLink {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .loginCard {
+        padding: 2rem 1.5rem;
+    }
+
+    .title {
+        font-size: 1.5rem;
+    }
+
+    .container {
+        padding: 1rem;
+    }
+}

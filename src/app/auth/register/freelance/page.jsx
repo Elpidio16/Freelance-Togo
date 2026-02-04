@@ -1,0 +1,221 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import Input from '@/components/ui/Input';
+import PhoneInput from '@/components/ui/PhoneInput';
+import Button from '@/components/ui/Button';
+import { useToast } from '@/components/Toast/ToastProvider';
+import styles from './freelance.module.css';
+
+export default function RegisterFreelancePage() {
+    const router = useRouter();
+    const { addToast } = useToast();
+    const [formData, setFormData] = useState({
+        firstName: '',
+        lastName: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+        phone: '',
+        city: '',
+    });
+
+    const [errors, setErrors] = useState({});
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        // Simple validation
+        const newErrors = {};
+
+        if (!formData.firstName) newErrors.firstName = 'Prénom requis';
+        if (!formData.lastName) newErrors.lastName = 'Nom requis';
+        if (!formData.email) newErrors.email = 'Email requis';
+        if (!formData.password) newErrors.password = 'Mot de passe requis';
+        if (formData.password.length < 6) newErrors.password = 'Le mot de passe doit contenir au moins 6 caractères';
+        if (formData.password !== formData.confirmPassword) {
+            newErrors.confirmPassword = 'Les mots de passe ne correspondent pas';
+        }
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            return;
+        }
+
+        setIsLoading(true);
+
+        try {
+            const response = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    ...formData,
+                    role: 'freelance'
+                }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                addToast(data.error || 'Une erreur est survenue', 'error');
+                return;
+            }
+
+            //Succès ! Account créé, vérification email requise
+            addToast('📧 Compte créé ! Vérifiez votre email pour activer votre compte.', 'info');
+
+            // Rediriger vers une page d'information
+            setTimeout(() => {
+                router.push(`/auth/verify-pending?email=${encodeURIComponent(formData.email)}`);
+            }, 2000);
+
+        } catch (error) {
+            console.error('Erreur:', error);
+            addToast('Une erreur est survenue. Veuillez réessayer.', 'error');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+        // Clear error when user starts typing
+        if (errors[name]) {
+            setErrors(prev => ({ ...prev, [name]: '' }));
+        }
+    };
+
+    return (
+        <div className={styles.page}>
+            <nav className={styles.nav}>
+                <div className="container">
+                    <Link href="/" className={styles.logo}>
+                        <span className={styles.logoText}>Freelance</span>
+                        <span className={styles.logoAccent}>Togo</span>
+                    </Link>
+                </div>
+            </nav>
+
+            <div className={styles.formContainer}>
+                <div className={styles.formCard}>
+                    <h1 className={styles.title}>Créer mon profil de freelance</h1>
+                    <p className={styles.subtitle}>
+                        Rejoignez des centaines d'ingénieurs qui utilisent Freelance Togo pour trouver des missions
+                    </p>
+
+                    <form onSubmit={handleSubmit} className={styles.form}>
+                        <div className="grid grid-cols-2 gap-md">
+                            <Input
+                                label="Prénom"
+                                name="firstName"
+                                value={formData.firstName}
+                                onChange={handleChange}
+                                error={errors.firstName}
+                                required
+                            />
+
+                            <Input
+                                label="Nom"
+                                name="lastName"
+                                value={formData.lastName}
+                                onChange={handleChange}
+                                error={errors.lastName}
+                                required
+                            />
+                        </div>
+
+                        <Input
+                            label="Email professionnel"
+                            type="email"
+                            name="email"
+                            value={formData.email}
+                            onChange={handleChange}
+                            error={errors.email}
+                            placeholder="votre.email@example.com"
+                            required
+                        />
+
+                        <PhoneInput
+                            name="phone"
+                            value={formData.phone}
+                            onChange={handleChange}
+                        />
+
+                        <Input
+                            label="Ville au Togo"
+                            name="city"
+                            value={formData.city}
+                            onChange={handleChange}
+                            placeholder="Lomé, Kara, Sokodé..."
+                        />
+
+                        <Input
+                            label="Mot de passe"
+                            type="password"
+                            name="password"
+                            value={formData.password}
+                            onChange={handleChange}
+                            error={errors.password}
+                            required
+                        />
+
+                        <Input
+                            label="Confirmer le mot de passe"
+                            type="password"
+                            name="confirmPassword"
+                            value={formData.confirmPassword}
+                            onChange={handleChange}
+                            error={errors.confirmPassword}
+                            required
+                        />
+
+                        <Button
+                            type="submit"
+                            variant="primary"
+                            size="lg"
+                            className={styles.submitBtn}
+                            disabled={isLoading}
+                        >
+                            {isLoading ? 'Création en cours...' : 'Créer mon compte'}
+                        </Button>
+
+                        <p className={styles.loginLink}>
+                            Vous avez déjà un compte ?{' '}
+                            <Link href="/auth/login" className={styles.link}>
+                                Connectez-vous
+                            </Link>
+                        </p>
+                    </form>
+                </div>
+
+                <div className={styles.sideInfo}>
+                    <h3>Pourquoi rejoindre Freelance Togo ?</h3>
+                    <ul className={styles.benefits}>
+                        <li>
+                            <span className={styles.icon}>✓</span>
+                            <span>Accédez à des missions d'ingénierie de qualité</span>
+                        </li>
+                        <li>
+                            <span className={styles.icon}>✓</span>
+                            <span>Gérez vos propositions et projets en un seul endroit</span>
+                        </li>
+                        <li>
+                            <span className={styles.icon}>✓</span>
+                            <span>Profil professionnel pour vous démarquer</span>
+                        </li>
+                        <li>
+                            <span className={styles.icon}>✓</span>
+                            <span>Paiements sécurisés et traçables</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    );
+}

@@ -1,0 +1,150 @@
+.page {
+    min-height: 100vh;
+    background: var(--bg-secondary);
+}
+
+.nav {
+    background: white;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: 800;
+}
+
+.logoText {
+    color: var(--text-primary);
+}
+
+.logoAccent {
+    color: var(--primary-color);
+}
+
+.formContainer {
+    max-width: 1200px;
+    margin: 3rem auto;
+    padding: 0 2rem;
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 3rem;
+    align-items: start;
+}
+
+.formCard {
+    background: white;
+    border-radius: var(--radius-xl);
+    padding: 3rem;
+    box-shadow: var(--shadow-md);
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+    font-size: 1rem;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+}
+
+.submitBtn {
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.loginLink {
+    text-align: center;
+    color: var(--text-secondary);
+    margin-top: 1.5rem;
+    font-size: 0.875rem;
+}
+
+.link {
+    color: var(--primary-color);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.link:hover {
+    text-decoration: underline;
+}
+
+/* Side Info */
+.sideInfo {
+    background: white;
+    border-radius: var(--radius-xl);
+    padding: 2rem;
+    box-shadow: var(--shadow-md);
+    position: sticky;
+    top: 2rem;
+}
+
+.sideInfo h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+}
+
+.benefits {
+    list-style: none;
+    padding: 0;
+}
+
+.benefits li {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    color: var(--text-secondary);
+}
+
+.icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: var(--secondary-light);
+    color: var(--secondary-color);
+    border-radius: 50%;
+    font-weight: 700;
+    font-size: 0.875rem;
+    flex-shrink: 0;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .formContainer {
+        grid-template-columns: 1fr;
+    }
+
+    .sideInfo {
+        position: static;
+    }
+}
+
+@media (max-width: 768px) {
+    .formCard {
+        padding: 2rem 1.5rem;
+    }
+
+    .title {
+        font-size: 1.5rem;
+    }
+
+    .formContainer {
+        padding: 0 1rem;
+        margin: 2rem auto;
+    }
+}
