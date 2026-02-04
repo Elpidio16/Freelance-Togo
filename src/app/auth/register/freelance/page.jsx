@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Input from '@/components/ui/Input';
 import PhoneInput from '@/components/ui/PhoneInput';
-import Button from '@/components/ui/Button';
 import { useToast } from '@/components/Toast/ToastProvider';
 import styles from './freelance.module.css';
 
@@ -28,20 +27,30 @@ export default function RegisterFreelancePage() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Simple validation
+        // Validation
         const newErrors = {};
 
         if (!formData.firstName) newErrors.firstName = 'Prénom requis';
         if (!formData.lastName) newErrors.lastName = 'Nom requis';
-        if (!formData.email) newErrors.email = 'Email requis';
-        if (!formData.password) newErrors.password = 'Mot de passe requis';
-        if (formData.password.length < 6) newErrors.password = 'Le mot de passe doit contenir au moins 6 caractères';
+        if (!formData.email) {
+            newErrors.email = 'Email requis';
+        } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+            newErrors.email = 'Email invalide';
+        }
+        if (!formData.phone) newErrors.phone = 'Téléphone requis';
+        if (!formData.city) newErrors.city = 'Ville requise';
+        if (!formData.password) {
+            newErrors.password = 'Mot de passe requis';
+        } else if (formData.password.length < 6) {
+            newErrors.password = 'Le mot de passe doit contenir au moins 6 caractères';
+        }
         if (formData.password !== formData.confirmPassword) {
             newErrors.confirmPassword = 'Les mots de passe ne correspondent pas';
         }
 
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
+            addToast('Veuillez corriger les erreurs', 'error');
             return;
         }
 
@@ -66,10 +75,10 @@ export default function RegisterFreelancePage() {
                 return;
             }
 
-            //Succès ! Account créé, vérification email requise
-            addToast('📧 Compte créé ! Vérifiez votre email pour activer votre compte.', 'info');
+            // Succès !
+            addToast('📧 Compte créé ! Vérifiez votre email pour activer votre compte.', 'success');
 
-            // Rediriger vers une page d'information
+            // Rediriger vers la page de vérification
             setTimeout(() => {
                 router.push(`/auth/verify-pending?email=${encodeURIComponent(formData.email)}`);
             }, 2000);
@@ -102,118 +111,135 @@ export default function RegisterFreelancePage() {
                 </div>
             </nav>
 
-            <div className={styles.formContainer}>
-                <div className={styles.formCard}>
-                    <h1 className={styles.title}>Créer mon profil de freelance</h1>
-                    <p className={styles.subtitle}>
-                        Rejoignez des centaines d'ingénieurs qui utilisent Freelance Togo pour trouver des missions
-                    </p>
+            <div className={styles.container}>
+                <div className={styles.formSection}>
+                    <div className={styles.header}>
+                        <Link href="/" className={styles.logo}>
+                            <span className={styles.logoText}>Freelance</span>
+                            <span className={styles.logoAccent}>Togo</span>
+                        </Link>
+                        <h1>Créer mon profil de freelance</h1>
+                        <p>Rejoignez des centaines de freelances qui utilisent Freelance Togo</p>
+                    </div>
 
                     <form onSubmit={handleSubmit} className={styles.form}>
-                        <div className="grid grid-cols-2 gap-md">
+                        <div className={styles.formGroup}>
+                            <label>Informations personnelles</label>
+                            <div className={styles.row}>
+                                <Input
+                                    label="Prénom"
+                                    name="firstName"
+                                    value={formData.firstName}
+                                    onChange={handleChange}
+                                    error={errors.firstName}
+                                    required
+                                />
+                                <Input
+                                    label="Nom"
+                                    name="lastName"
+                                    value={formData.lastName}
+                                    onChange={handleChange}
+                                    error={errors.lastName}
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <div className={styles.formGroup}>
+                            <label>Contact</label>
                             <Input
-                                label="Prénom"
-                                name="firstName"
-                                value={formData.firstName}
+                                label="Email professionnel"
+                                type="email"
+                                name="email"
+                                value={formData.email}
                                 onChange={handleChange}
-                                error={errors.firstName}
+                                error={errors.email}
+                                placeholder="votre.email@example.com"
                                 required
                             />
-
-                            <Input
-                                label="Nom"
-                                name="lastName"
-                                value={formData.lastName}
+                            <PhoneInput
+                                name="phone"
+                                value={formData.phone}
                                 onChange={handleChange}
-                                error={errors.lastName}
+                                error={errors.phone}
                                 required
                             />
                         </div>
 
-                        <Input
-                            label="Email professionnel"
-                            type="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            error={errors.email}
-                            placeholder="votre.email@example.com"
-                            required
-                        />
+                        <div className={styles.formGroup}>
+                            <label>Localisation</label>
+                            <Input
+                                label="Ville au Togo"
+                                name="city"
+                                value={formData.city}
+                                onChange={handleChange}
+                                error={errors.city}
+                                placeholder="Lomé, Kara, Sokodé..."
+                                required
+                            />
+                        </div>
 
-                        <PhoneInput
-                            name="phone"
-                            value={formData.phone}
-                            onChange={handleChange}
-                        />
+                        <div className={styles.formGroup}>
+                            <label>Sécurité</label>
+                            <Input
+                                label="Mot de passe"
+                                type="password"
+                                name="password"
+                                value={formData.password}
+                                onChange={handleChange}
+                                error={errors.password}
+                                required
+                            />
+                            <Input
+                                label="Confirmer le mot de passe"
+                                type="password"
+                                name="confirmPassword"
+                                value={formData.confirmPassword}
+                                onChange={handleChange}
+                                error={errors.confirmPassword}
+                                required
+                            />
+                        </div>
 
-                        <Input
-                            label="Ville au Togo"
-                            name="city"
-                            value={formData.city}
-                            onChange={handleChange}
-                            placeholder="Lomé, Kara, Sokodé..."
-                        />
-
-                        <Input
-                            label="Mot de passe"
-                            type="password"
-                            name="password"
-                            value={formData.password}
-                            onChange={handleChange}
-                            error={errors.password}
-                            required
-                        />
-
-                        <Input
-                            label="Confirmer le mot de passe"
-                            type="password"
-                            name="confirmPassword"
-                            value={formData.confirmPassword}
-                            onChange={handleChange}
-                            error={errors.confirmPassword}
-                            required
-                        />
-
-                        <Button
+                        <button
                             type="submit"
-                            variant="primary"
-                            size="lg"
-                            className={styles.submitBtn}
+                            className="btn btn-primary btn-lg"
                             disabled={isLoading}
                         >
                             {isLoading ? 'Création en cours...' : 'Créer mon compte'}
-                        </Button>
+                        </button>
 
-                        <p className={styles.loginLink}>
-                            Vous avez déjà un compte ?{' '}
-                            <Link href="/auth/login" className={styles.link}>
-                                Connectez-vous
-                            </Link>
+                        <p className={styles.switchText}>
+                            Vous êtes une entreprise ? {' '}
+                            <Link href="/auth/register/company">Créer un compte entreprise</Link>
+                        </p>
+
+                        <p className={styles.loginText}>
+                            Vous avez déjà un compte ? {' '}
+                            <Link href="/auth/login">Connectez-vous</Link>
                         </p>
                     </form>
                 </div>
 
-                <div className={styles.sideInfo}>
-                    <h3>Pourquoi rejoindre Freelance Togo ?</h3>
-                    <ul className={styles.benefits}>
-                        <li>
-                            <span className={styles.icon}>✓</span>
-                            <span>Accédez à des missions d'ingénierie de qualité</span>
-                        </li>
-                        <li>
-                            <span className={styles.icon}>✓</span>
-                            <span>Gérez vos propositions et projets en un seul endroit</span>
-                        </li>
-                        <li>
-                            <span className={styles.icon}>✓</span>
-                            <span>Profil professionnel pour vous démarquer</span>
-                        </li>
-                        <li>
-                            <span className={styles.icon}>✓</span>
-                            <span>Paiements sécurisés et traçables</span>
-                        </li>
-                    </ul>
+                <div className={styles.infoSection}>
+                    <h2>Pourquoi rejoindre Freelance Togo ?</h2>
+                    <div className={styles.features}>
+                        <div className={styles.feature}>
+                            <div className={styles.featureIcon}>💼</div>
+                            <h3>Missions de qualité</h3>
+                            <p>Accédez à des projets d'entreprises togolaises et internationales</p>
+                        </div>
+                        <div className={styles.feature}>
+                            <div className={styles.featureIcon}>⚡</div>
+                            <h3>Gestion simplifiée</h3>
+                            <p>Gérez vos propositions et projets depuis un seul tableau de bord</p>
+                        </div>
+                        <div className={styles.feature}>
+                            <div className={styles.featureIcon}>🎯</div>
+                            <h3>Profil professionnel</h3>
+                            <p>Créez un profil qui met en valeur vos compétences et expériences</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

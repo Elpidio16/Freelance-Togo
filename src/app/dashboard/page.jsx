@@ -56,14 +56,29 @@ export default function DashboardPage() {
                         </Link>
                     </div>
 
-                    <div className={styles.card}>
+                    {/* V2: Projects Section - Hidden for V1 */}
+                    {/* <div className={styles.card}>
                         <div className={styles.cardIcon}>💼</div>
                         <h3>Mes projets</h3>
-                        <p>Gérez vos projets en cours</p>
-                        <Link href="/projects" className="btn btn-outline">
-                            Voir les projets
-                        </Link>
-                    </div>
+                        ...
+                    </div> */}
+
+                    {/* V2: Messages Section - Hidden for V1 */}
+                    {/* <div className={styles.card}>
+                        <div className={styles.cardIcon}>💬</div>
+                        <h3>Messages</h3>
+                        ...
+                    </div> */}
+
+                    {/* V2: Favorites Section - Hidden for V1 */}
+                    {/* {session.user.role === 'company' && (
+                        <div className={styles.card}>
+                            <div className={styles.cardIcon}>⭐</div>
+                            <h3>Mes Favoris</h3>
+                            ...
+                        </div>
+                    )} */}
+
 
                     <div className={styles.card}>
                         <div className={styles.cardIcon}>⭐</div>

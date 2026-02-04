@@ -10,7 +10,7 @@ const VerificationTokenSchema = new mongoose.Schema({
     token: {
         type: String,
         required: true,
-        unique: true,
+        unique: true, // This already creates an index
     },
     expires: {
         type: Date,
@@ -24,9 +24,8 @@ const VerificationTokenSchema = new mongoose.Schema({
     },
 });
 
-// Index pour performance
+// Index pour performance (token index removed as it's created by unique:true)
 VerificationTokenSchema.index({ email: 1 });
-VerificationTokenSchema.index({ token: 1 });
 VerificationTokenSchema.index({ expires: 1 });
 
 export default mongoose.models.VerificationToken ||

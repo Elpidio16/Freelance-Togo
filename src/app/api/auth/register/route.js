@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
+import CompanyProfile from '@/models/CompanyProfile';
 import VerificationToken from '@/models/VerificationToken';
 import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
@@ -11,7 +12,20 @@ export async function POST(request) {
         await connectDB();
 
         const body = await request.json();
-        const { email, password, role, firstName, lastName, phone, city } = body;
+        const {
+            email,
+            password,
+            role,
+            firstName,
+            lastName,
+            phone,
+            city,
+            // Company specific fields
+            companyName,
+            sector,
+            companySize,
+            website,
+        } = body;
 
         // Vérifier si l'utilisateur existe déjà
         const existingUser = await User.findOne({ email });
@@ -37,6 +51,19 @@ export async function POST(request) {
             isVerified: false,
             emailVerified: null,
         });
+
+        // Si c'est une entreprise, créer le profil entreprise
+        if (role === 'company' && companyName) {
+            await CompanyProfile.create({
+                userId: user._id,
+                companyName,
+                sector,
+                size: companySize,
+                website: website || '',
+                location: city,
+                description: '',
+            });
+        }
 
         // Générer un token de vérification
         const verificationToken = uuidv4();

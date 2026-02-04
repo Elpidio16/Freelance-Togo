@@ -1,0 +1,545 @@
+.page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #fefaf7 0%, #fef5f0 30%, #fdeee7 60%, #fce6db 100%);
+}
+
+.nav {
+    padding: 1.25rem 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(10px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.logoText {
+    color: var(--text-primary);
+}
+
+.logoAccent {
+    color: var(--primary-color);
+}
+
+.container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* Profile Header */
+.profileHeader {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: 2.5rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-md);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 2rem;
+}
+
+.headerLeft {
+    display: flex;
+    gap: 2rem;
+    flex: 1;
+}
+
+.avatarLarge {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.avatarPlaceholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 3rem;
+    font-weight: 700;
+}
+
+.headerInfo h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.jobTitle {
+    font-size: 1.25rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+}
+
+.location {
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+}
+
+.rating {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.stars {
+    color: #fbbf24;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.reviews,
+.projects {
+    color: var(--text-tertiary);
+}
+
+.headerRight {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-width: 250px;
+}
+
+.rateCard {
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+}
+
+.rateItem {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-bottom: 1rem;
+}
+
+.rateItem:last-child {
+    margin-bottom: 0;
+}
+
+.rateLabel {
+    font-size: 0.9rem;
+    color: var(--text-tertiary);
+}
+
+.rateValue {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.availability {
+    margin-top: 0.5rem;
+}
+
+.badge {
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.disponible {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.occupé {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.bientôt-disponible {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+/* Content Sections */
+.content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.section {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.section h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+}
+
+.bio {
+    color: var(--text-secondary);
+    line-height: 1.7;
+    font-size: 1.05rem;
+}
+
+/* Skills */
+.skillsGrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.skillBadge {
+    padding: 0.6rem 1.2rem;
+    background: linear-gradient(135deg, var(--primary-color), #f59e7a);
+    color: white;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+/* Portfolio */
+.portfolioGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.portfolioCard {
+    border: 2px solid var(--bg-tertiary);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.portfolioCard:hover {
+    border-color: var(--primary-color);
+    box-shadow: var(--shadow-md);
+}
+
+.portfolioCard h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.portfolioCard p {
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+
+.techStack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.tech {
+    padding: 0.4rem 0.8rem;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    color: var(--text-primary);
+}
+
+/* Timeline (Experience) */
+.timeline {
+    position: relative;
+    padding-left: 2rem;
+}
+
+.timelineItem {
+    position: relative;
+    padding-bottom: 2rem;
+}
+
+.timelineItem:last-child {
+    padding-bottom: 0;
+}
+
+.timelineDot {
+    position: absolute;
+    left: -2rem;
+    top: 0.25rem;
+    width: 12px;
+    height: 12px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    border: 3px solid white;
+    box-shadow: 0 0 0 2px var(--primary-color);
+}
+
+.timelineItem::before {
+    content: '';
+    position: absolute;
+    left: -1.55rem;
+    top: 1rem;
+    width: 2px;
+    height: calc(100% - 0.5rem);
+    background: var(--bg-tertiary);
+}
+
+.timelineItem:last-child::before {
+    display: none;
+}
+
+.timelineContent h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.company {
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0.25rem;
+}
+
+.duration {
+    color: var(--text-tertiary);
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+}
+
+.description {
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+/* Education */
+.educationItem {
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--bg-tertiary);
+}
+
+.educationItem:last-child {
+    border-bottom: none;
+}
+
+.educationItem h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.educationItem p {
+    color: var(--text-secondary);
+}
+
+/* Languages */
+.languagesGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.languageItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+}
+
+.langName {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.langLevel {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+@media (max-width: 968px) {
+    .profileHeader {
+        flex-direction: column;
+    }
+
+    .headerRight {
+        width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .headerLeft {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .headerInfo h1 {
+        font-size: 1.5rem;
+    }
+
+    .portfolioGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .timeline {
+        padding-left: 1.5rem;
+    }
+}
+
+/* Reviews Section */
+.reviewsStats {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    gap: 3rem;
+    margin-bottom: 2.5rem;
+    padding-bottom: 2rem;
+    border-bottom: 2px solid var(--bg-tertiary);
+}
+
+.averageRating {
+    text-align: center;
+}
+
+.ratingNumber {
+    font-size: 4rem;
+    font-weight: 800;
+    color: var(--primary-color);
+    line-height: 1;
+}
+
+.stars {
+    font-size: 1.5rem;
+    margin: 0.5rem 0;
+}
+
+.starFilled {
+    opacity: 1;
+}
+
+.starEmpty {
+    opacity: 0.2;
+}
+
+.reviewCount {
+    color: var(--text-tertiary);
+    font-size: 0.95rem;
+    margin-top: 0.5rem;
+}
+
+.ratingBars {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.ratingBar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.95rem;
+}
+
+.ratingBar>span:first-child {
+    width: 40px;
+    text-align: right;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.barContainer {
+    flex: 1;
+    height: 10px;
+    background: var(--bg-tertiary);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.barFill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    border-radius: 999px;
+    transition: width 0.3s ease;
+}
+
+.barCount {
+    width: 30px;
+    text-align: right;
+    color: var(--text-tertiary);
+    font-size: 0.9rem;
+}
+
+.reviewsList {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.reviewCard {
+    padding: 1.75rem;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    border-left: 4px solid var(--primary-color);
+}
+
+.reviewHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.reviewHeader h4 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 0.25rem 0;
+}
+
+.reviewProject {
+    color: var(--text-tertiary);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.reviewRating {
+    font-size: 1.25rem;
+}
+
+.reviewComment {
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin: 0 0 1rem 0;
+}
+
+.reviewDate {
+    color: var(--text-tertiary);
+    font-size: 0.85rem;
+}
+
+.noReviews {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-tertiary);
+}
+
+@media (max-width: 768px) {
+    .reviewsStats {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+}

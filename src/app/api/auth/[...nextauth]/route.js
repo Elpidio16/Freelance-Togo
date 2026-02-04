@@ -34,10 +34,10 @@ export const authOptions = {
                         throw new Error('Email ou mot de passe incorrect');
                     }
 
-                    // Vérifier si l'email est vérifié
-                    if (!user.isVerified) {
-                        throw new Error('Veuillez vérifier votre email avant de vous connecter. Consultez votre boîte de réception.');
-                    }
+                    // Vérifier si l'email est vérifié (désactivé en développement)
+                    // if (!user.isVerified) {
+                    //     throw new Error('Veuillez vérifier votre email avant de vous connecter. Consultez votre boîte de réception.');
+                    // }
 
                     // Retourner l'utilisateur (sans le mot de passe)
                     return {
