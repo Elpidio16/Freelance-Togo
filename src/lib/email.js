@@ -1,35 +1,36 @@
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 import emailTemplates from './email-templates';
 
-const resend = process.env.RESEND_API_KEY
-  ? new Resend(process.env.RESEND_API_KEY)
-  : { emails: { send: async () => ({ error: { message: 'RESEND_API_KEY is missing' } }) } };
-const FROM_EMAIL = process.env.EMAIL_FROM || 'IngeniHub <noreply@ingenihub.com>';
+// Configuration Gmail SMTP
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.GMAIL_USER, // Votre adresse Gmail
+    pass: process.env.GMAIL_APP_PASSWORD, // Mot de passe d'application Gmail
+  },
+});
+
+const FROM_EMAIL = process.env.EMAIL_FROM || process.env.GMAIL_USER || 'noreply@ingenihub.com';
 
 /**
  * Generic email sending function with error handling and logging
  */
 export async function sendEmail({ to, subject, html, replyTo }) {
   try {
-    const { data, error } = await resend.emails.send({
+    console.log(`📧 Tentative d'envoi à ${to} | Sujet: ${subject}`);
+
+    const info = await transporter.sendMail({
       from: FROM_EMAIL,
       to,
       subject,
       html,
+      ...(replyTo && { replyTo }),
     });
 
-    // DEBUG: Log result
-    console.log(`📧 Tentative d'envoi à ${to} | Sujet: ${subject}`);
-    if (error) {
-      console.error('❌ Erreur Resend détaillée:', JSON.stringify(error, null, 2));
-      return false;
-    }
-    console.log('✅ ID Email Resend:', data?.id);
-
-    console.log('✅ Email envoyé avec succès:', { to, subject, id: data?.id });
+    console.log('✅ Email envoyé avec succès:', { to, subject, messageId: info.messageId });
     return true;
   } catch (error) {
-    console.error('❌ Erreur lors de l\'envoi de l\'email:', error);
+    console.error('❌ Erreur lors de l\'envoi de l\'email:', JSON.stringify(error, null, 2));
     return false;
   }
 }
