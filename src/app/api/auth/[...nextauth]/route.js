@@ -50,6 +50,11 @@ export const authOptions = {
                         throw new Error('Email ou mot de passe incorrect');
                     }
 
+                    // Vérifier si l'email est confirmé
+                    if (!user.isVerified) {
+                        throw new Error('Veuillez vérifier votre email avant de vous connecter.');
+                    }
+
                     // Retourner l'utilisateur (sans le mot de passe)
                     return {
                         id: user.id,
