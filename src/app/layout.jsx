@@ -5,6 +5,7 @@ import MobileMenu from '@/components/navigation/MobileMenu';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import CookieConsent from '@/components/legal/CookieConsent';
+import SourceProtection from '@/components/security/SourceProtection';
 
 export const metadata = {
     title: 'IngeniHub - Trouvez les meilleurs ingénieurs au Togo',
@@ -26,6 +27,7 @@ export default function RootLayout({ children }) {
                             <Footer />
                         </div>
                         <CookieConsent />
+                        <SourceProtection />
                     </ToastProvider>
                 </Providers>
             </body>
