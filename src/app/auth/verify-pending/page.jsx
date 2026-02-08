@@ -25,7 +25,7 @@ export default function VerifyPendingPage() {
                         <h2>Prochaines étapes :</h2>
                         <ol>
                             <li>Ouvrez votre boîte de réception</li>
-                            <li>Recherchez l'email de <strong>Freelance Togo</strong></li>
+                            <li>Recherchez l'email de <strong>IngeniHub</strong></li>
                             <li>Cliquez sur le lien de vérification</li>
                             <li>Connectez-vous à votre compte !</li>
                         </ol>

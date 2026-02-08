@@ -2,7 +2,7 @@
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    background: linear-gradient(180deg, #f0f7ff 0%, #ffffff 100%);
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 30%, #bfdbfe 60%, #93c5fd 100%);
 }
 
 /* Navigation */
@@ -17,11 +17,11 @@
 }
 
 .logoText {
-    color: var(--text-primary);
+    color: var(--color-text);
 }
 
 .logoAccent {
-    color: var(--primary-color);
+    color: var(--color-primary);
 }
 
 /* Main Container */
@@ -52,7 +52,7 @@
 .title {
     font-size: 2rem;
     font-weight: 700;
-    color: var(--text-primary);
+    color: var(--color-text);
     max-width: 600px;
     margin: 0 auto;
 }
@@ -68,7 +68,7 @@
 
 .choiceCard {
     background: white;
-    border: 2px solid var(--border-color);
+    border: 2px solid var(--color-border);
     border-radius: var(--radius-xl);
     padding: 3rem 2rem;
     cursor: pointer;
@@ -78,7 +78,7 @@
 }
 
 .choiceCard:hover {
-    border-color: var(--primary-color);
+    border-color: var(--color-primary);
     box-shadow: var(--shadow-lg);
     transform: translateY(-4px);
 }
@@ -114,14 +114,14 @@
     top: 10px;
     left: 50%;
     transform: translateX(-50%);
-    border: 3px solid var(--text-primary);
+    border: 3px solid var(--color-text);
 }
 
 .glasses {
     position: absolute;
     width: 40px;
     height: 15px;
-    border: 3px solid var(--text-primary);
+    border: 3px solid var(--color-text);
     border-radius: var(--radius-md);
     top: 28px;
     left: 50%;
@@ -138,7 +138,7 @@
     bottom: 0;
     left: 50%;
     transform: translateX(-50%);
-    border: 3px solid var(--text-primary);
+    border: 3px solid var(--color-text);
 }
 
 /* Freelance Illustration */
@@ -160,8 +160,8 @@
 .screen {
     width: 100%;
     height: 35px;
-    background: var(--primary-color);
-    border: 3px solid var(--text-primary);
+    background: var(--color-primary);
+    border: 3px solid var(--color-text);
     border-radius: var(--radius-sm) var(--radius-sm) 0 0;
 }
 
@@ -169,7 +169,7 @@
     width: 100%;
     height: 10px;
     background: #dfe6e9;
-    border: 3px solid var(--text-primary);
+    border: 3px solid var(--color-text);
     border-top: none;
     border-radius: 0 0 var(--radius-sm) var(--radius-sm);
 }
@@ -185,7 +185,7 @@
     height: 30px;
     background: #ffeaa7;
     border-radius: 50%;
-    border: 2px solid var(--text-primary);
+    border: 2px solid var(--color-text);
     margin-bottom: 2px;
 }
 
@@ -194,7 +194,7 @@
     height: 25px;
     background: #74b9ff;
     border-radius: var(--radius-md);
-    border: 2px solid var(--text-primary);
+    border: 2px solid var(--color-text);
 }
 
 /* Choice Text */
@@ -202,11 +202,11 @@
     font-size: 1.5rem;
     font-weight: 700;
     margin-bottom: 0.5rem;
-    color: var(--text-primary);
+    color: var(--color-text);
 }
 
 .choiceDescription {
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     font-size: 1rem;
     margin: 0;
 }
@@ -214,7 +214,7 @@
 /* Footer */
 .footer {
     margin-top: 3rem;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     font-size: 0.875rem;
 }
 
@@ -223,12 +223,12 @@
 }
 
 .footerNote {
-    color: var(--text-tertiary);
+    color: var(--color-text-tertiary);
     font-size: 0.8rem;
 }
 
 .link {
-    color: var(--primary-color);
+    color: var(--color-primary);
     text-decoration: underline;
     font-weight: 500;
 }

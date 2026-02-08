@@ -2,7 +2,7 @@ import Link from 'next/link';
 import styles from './categories.module.css';
 
 export const metadata = {
-    title: 'Catégories - Freelance Togo',
+    title: 'Catégories - IngeniHub',
     description: 'Découvrez toutes les catégories de services freelances disponibles au Togo',
 };
 
@@ -54,15 +54,6 @@ export default function CategoriesPage() {
 
     return (
         <div className={styles.page}>
-            <nav className={styles.nav}>
-                <div className="container">
-                    <Link href="/" className={styles.logo}>
-                        <span className={styles.logoText}>Freelance</span>
-                        <span className={styles.logoAccent}>Togo</span>
-                    </Link>
-                </div>
-            </nav>
-
             <div className={styles.container}>
                 <div className={styles.header}>
                     <h1>Toutes les catégories</h1>

@@ -14,6 +14,7 @@ export async function GET(request) {
         const maxRate = searchParams.get('maxRate');
         const search = searchParams.get('search');
         const skills = searchParams.get('skills');
+        const category = searchParams.get('category');
 
         // Construire les filtres
         let filters = {};
@@ -31,6 +32,11 @@ export async function GET(request) {
         if (skills) {
             const skillsArray = skills.split(',').map(s => s.trim());
             filters.skills = { $in: skillsArray };
+        }
+
+        // Filtre par catégorie
+        if (category) {
+            filters.category = category;
         }
 
         // Recherche textuelle sur title, bio, skills
@@ -54,6 +60,7 @@ export async function GET(request) {
             name: `${profile.userId.firstName} ${profile.userId.lastName}`,
             title: profile.title,
             bio: profile.bio,
+            category: profile.category || 'Autre',
             image: profile.profileImage || null,
             rating: profile.averageRating || 0,
             reviews: profile.totalReviews || 0,

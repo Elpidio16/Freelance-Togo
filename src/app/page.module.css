@@ -4,48 +4,59 @@
     flex-direction: column;
 }
 
-/* Navigation */
+/* Navigation - Modern & Sticky */
 .nav {
     padding: 1.25rem 0;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    border-bottom: 1px solid var(--color-border);
     background: rgba(255, 255, 255, 0.98);
     backdrop-filter: blur(10px);
     position: sticky;
     top: 0;
-    z-index: 1000;
+    z-index: var(--z-sticky);
+    transition: all var(--transition-fast);
 }
 
 .userMenu {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: var(--spacing-md);
 }
 
 .userName {
     font-weight: 600;
-    color: var(--text-primary);
-    padding: 0.5rem 1rem;
-    background: var(--bg-tertiary);
+    color: var(--color-text);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--color-surface);
     border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+}
+
+.userName:hover {
+    background: var(--color-surface-hover);
 }
 
 .logo {
-    font-size: 1.5rem;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.75rem;
     font-weight: 800;
+    letter-spacing: -0.02em;
 }
 
 .logoText {
-    color: var(--text-primary);
+    color: var(--color-text);
 }
 
 .logoAccent {
-    color: var(--primary-color);
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
-/* Hero Section */
+/* Hero Section - Modern Gradient */
 .hero {
-    padding: 6rem 0;
-    background: linear-gradient(135deg, #fefaf7 0%, #fef5f0 30%, #fdeee7 60%, #fce6db 100%);
+    padding: clamp(4rem, 10vw, 8rem) 0;
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 30%, #bfdbfe 60%, #93c5fd 100%);
     position: relative;
     overflow: hidden;
 }
@@ -57,8 +68,9 @@
     right: -10%;
     width: 600px;
     height: 600px;
-    background: radial-gradient(circle, rgba(255, 107, 53, 0.15), transparent 70%);
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.2), transparent 70%);
     border-radius: 50%;
+    animation: float 20s ease-in-out infinite;
 }
 
 .hero::after {
@@ -68,179 +80,214 @@
     left: -5%;
     width: 500px;
     height: 500px;
-    background: radial-gradient(circle, rgba(0, 180, 216, 0.12), transparent 70%);
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.15), transparent 70%);
     border-radius: 50%;
+    animation: float 15s ease-in-out infinite reverse;
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translate(0, 0);
+    }
+
+    50% {
+        transform: translate(30px, 30px);
+    }
 }
 
 .heroContent {
     position: relative;
     z-index: 1;
     text-align: center;
-    max-width: 900px;
+    max-width: 1000px;
     margin: 0 auto;
 }
 
 .heroTitle {
-    color: var(--text-primary);
-    font-size: 3.5rem;
+    font-family: 'Poppins', sans-serif;
+    color: var(--color-text);
+    font-size: clamp(2.5rem, 6vw, 4rem);
     font-weight: 900;
-    margin-bottom: 1.5rem;
-    line-height: 1.2;
+    margin-bottom: var(--spacing-lg);
+    line-height: 1.1;
+    letter-spacing: -0.03em;
 }
 
 .gradient {
-    background: linear-gradient(135deg, var(--primary-color), var(--warning-color), var(--secondary-color));
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 50%, var(--color-accent) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    font-weight: 800;
+    font-weight: 900;
 }
 
 .heroDescription {
-    color: var(--text-secondary);
-    font-size: 1.25rem;
-    margin-bottom: 3rem;
-    line-height: 1.6;
+    color: var(--color-text-secondary);
+    font-size: clamp(1.125rem, 2vw, 1.375rem);
+    margin-bottom: var(--spacing-3xl);
+    line-height: 1.7;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-/* Search Container */
+/* Search Container - Premium Design */
 .searchContainer {
-    margin-bottom: 3rem;
+    margin-bottom: var(--spacing-2xl);
 }
 
 .searchBox {
     background: white;
-    border-radius: var(--radius-xl);
-    padding: 1rem;
+    border-radius: var(--radius-2xl);
+    padding: var(--spacing-md);
     display: flex;
     align-items: center;
-    gap: 1rem;
-    box-shadow: var(--shadow-xl);
+    gap: var(--spacing-md);
+    box-shadow: var(--shadow-2xl);
     max-width: 900px;
     margin: 0 auto;
+    border: 1px solid var(--color-border);
+    transition: all var(--transition-normal);
+}
+
+.searchBox:hover {
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
 }
 
 .searchInput {
     flex: 1;
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.5rem;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm);
 }
 
 .searchIcon {
     width: 24px;
     height: 24px;
-    color: var(--text-tertiary);
+    color: var(--color-text-tertiary);
     flex-shrink: 0;
 }
 
 .input {
     border: none;
     outline: none;
+    font-family: 'Inter', sans-serif;
     font-size: 1rem;
-    color: var(--text-primary);
+    color: var(--color-text);
     width: 100%;
     background: transparent;
 }
 
 .input::placeholder {
-    color: var(--text-tertiary);
+    color: var(--color-text-tertiary);
 }
 
 .searchDivider {
     width: 1px;
     height: 40px;
-    background: var(--border-color);
+    background: var(--color-border);
 }
 
-/* Trust Indicators */
+/* Trust Indicators - Modern Pills */
 .trustIndicators {
     display: flex;
     justify-content: center;
-    gap: 3rem;
-    margin-top: 3rem;
+    gap: var(--spacing-2xl);
+    margin-top: var(--spacing-2xl);
     flex-wrap: wrap;
-    color: var(--text-secondary);
 }
 
 .trustItem {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    color: var(--text-secondary);
-    font-size: 0.95rem;
+    gap: var(--spacing-sm);
+    color: var(--color-text-secondary);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    padding: var(--spacing-sm) var(--spacing-lg);
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: var(--radius-full);
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-fast);
+}
+
+.trustItem:hover {
+    background: white;
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
 }
 
 .trustIcon {
     width: 20px;
     height: 20px;
+    color: var(--color-primary);
 }
 
 /* Categories Section */
 .categoriesSection {
-    padding: 5rem 0;
-    background: var(--bg-secondary);
+    padding: clamp(4rem, 8vw, 6rem) 0;
+    background: var(--color-surface);
 }
 
 .categoryIcon {
     font-size: 3rem;
-    margin-bottom: 1rem;
+    margin-bottom: var(--spacing-md);
 }
 
-/* CTA Section */
+/* CTA Section - Modern Gradient */
 .ctaSection {
-    padding: 5rem 0;
-    background: var(--bg-primary);
+    padding: clamp(4rem, 8vw, 6rem) 0;
+    background: var(--color-background);
 }
 
 .ctaCard {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 4rem 2rem;
-    border-radius: var(--radius-xl);
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+    padding: clamp(3rem, 6vw, 5rem) var(--spacing-xl);
+    border-radius: var(--radius-2xl);
     text-align: center;
     color: white;
+    box-shadow: var(--shadow-xl);
+    position: relative;
+    overflow: hidden;
+}
+
+.ctaCard::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.1), transparent 50%);
+    pointer-events: none;
 }
 
 .ctaCard h2 {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
+    font-family: 'Poppins', sans-serif;
+    font-size: clamp(2rem, 4vw, 3rem);
+    margin-bottom: var(--spacing-md);
     color: white;
+    font-weight: 800;
 }
 
 .ctaCard p {
-    font-size: 1.125rem;
-    color: rgba(255, 255, 255, 0.9);
-    margin-bottom: 2rem;
+    font-size: clamp(1rem, 2vw, 1.25rem);
+    color: rgba(255, 255, 255, 0.95);
+    margin-bottom: var(--spacing-xl);
+    line-height: 1.6;
 }
 
-/* Footer */
-.footer {
-    background: var(--text-primary);
-    color: white;
-    padding: 3rem 0;
-    margin-top: auto;
-}
-
-.footer p {
-    color: rgba(255, 255, 255, 0.7);
-}
-
-/* Responsive */
+/* Responsive Design */
 @media (max-width: 768px) {
-    .heroTitle {
-        font-size: 2rem;
-    }
-
-    .heroDescription {
-        font-size: 1rem;
-        margin-bottom: 2rem;
-    }
-
     .searchBox {
         flex-direction: column;
         align-items: stretch;
-        padding: 0.75rem;
+        padding: var(--spacing-sm);
+        gap: var(--spacing-sm);
     }
 
     .searchDivider {
@@ -249,18 +296,19 @@
     }
 
     .trustIndicators {
-        gap: 1.5rem;
-        font-size: 0.85rem;
+        gap: var(--spacing-md);
+        font-size: 0.875rem;
     }
 
     .trustItem {
         flex-direction: column;
         text-align: center;
-        gap: 0.25rem;
+        gap: var(--spacing-xs);
+        padding: var(--spacing-sm) var(--spacing-md);
     }
 
     .nav .flex {
-        gap: 0.5rem;
+        gap: var(--spacing-sm);
     }
 
     /* Hide most nav items on mobile, but keep the main CTA button */
@@ -273,15 +321,17 @@
         display: inline-flex;
     }
 
-    .ctaCard h2 {
-        font-size: 1.75rem;
-    }
-
-    .ctaCard p {
-        font-size: 1rem;
-    }
-
     .hero {
-        padding: 4rem 0;
+        padding: var(--spacing-3xl) 0;
+    }
+
+    .logo {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .trustItem {
+        font-size: 0.8125rem;
     }
 }

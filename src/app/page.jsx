@@ -1,77 +1,55 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useSession, signOut } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import styles from './page.module.css';
 
 export default function Home() {
     const { data: session, status } = useSession();
-    const isLoading = status === 'loading';
+    const router = useRouter();
+    const [stats, setStats] = useState({});
+    const [searchQuery, setSearchQuery] = useState('');
+    const [city, setCity] = useState('');
+
+    useEffect(() => {
+        // Charger les statistiques
+        fetch('/api/categories/stats')
+            .then(res => res.json())
+            .then(data => {
+                if (data.counts) {
+                    setStats(data.counts);
+                }
+            })
+            .catch(err => console.error('Erreur chargement stats:', err));
+    }, []);
+
+    const handleSearch = (e) => {
+        if (e) e.preventDefault();
+
+        const params = new URLSearchParams();
+        if (searchQuery) params.append('search', searchQuery);
+        if (city) params.append('city', city);
+
+        router.push(`/freelances/search?${params.toString()}`);
+    };
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            handleSearch();
+        }
+    };
 
     return (
         <div className={styles.page}>
-            {/* Navigation */}
-            <nav className={styles.nav}>
-                <div className="container">
-                    <div className="flex items-center justify-between">
-                        <div className={styles.logo}>
-                            <Link href="/">
-                                <span className={styles.logoText}>Freelance</span>
-                                <span className={styles.logoAccent}>Togo</span>
-                            </Link>
-                        </div>
-
-                        <div className="flex items-center gap-md">
-                            <Link href="/categories" className="btn-ghost">
-                                Catégories
-                            </Link>
-                            <Link href="/freelances/search" className="btn-ghost">
-                                Trouver un freelance
-                            </Link>
-
-                            {!isLoading && (
-                                <>
-                                    {session ? (
-                                        <>
-                                            <Link href="/dashboard" className="btn-ghost">
-                                                Tableau de bord
-                                            </Link>
-                                            <div className={styles.userMenu}>
-                                                <span className={styles.userName}>
-                                                    👋 {session.user.firstName}
-                                                </span>
-                                                <button
-                                                    onClick={() => signOut({ callbackUrl: '/' })}
-                                                    className="btn btn-outline"
-                                                >
-                                                    Déconnexion
-                                                </button>
-                                            </div>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Link href="/auth/login" className="btn-ghost">
-                                                Connexion
-                                            </Link>
-                                            <Link href="/auth/register" className="btn btn-primary">
-                                                Créer mon compte
-                                            </Link>
-                                        </>
-                                    )}
-                                </>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            </nav>
-
             {/* Hero Section */}
             <section className={styles.hero}>
                 <div className="container">
                     <div className={styles.heroContent}>
                         <h1 className={styles.heroTitle}>
                             Trouvez les meilleurs <br />
-                            <span className={styles.gradient}>ingénieurs freelances</span> <br />
+                            <span className={styles.gradient}>ingénieurs</span> <br />
                             au Togo
                         </h1>
 
@@ -91,6 +69,9 @@ export default function Home() {
                                         type="text"
                                         placeholder="Recherchez un métier, une compétence..."
                                         className={styles.input}
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        onKeyDown={handleKeyDown}
                                     />
                                 </div>
 
@@ -105,10 +86,16 @@ export default function Home() {
                                         type="text"
                                         placeholder="Ville au Togo"
                                         className={styles.input}
+                                        value={city}
+                                        onChange={(e) => setCity(e.target.value)}
+                                        onKeyDown={handleKeyDown}
                                     />
                                 </div>
 
-                                <button className="btn btn-primary btn-lg">
+                                <button
+                                    className="btn btn-primary btn-lg"
+                                    onClick={handleSearch}
+                                >
                                     Rechercher
                                 </button>
                             </div>
@@ -148,12 +135,14 @@ export default function Home() {
 
                     <div className="grid grid-cols-3">
                         {categories.map((category, index) => (
-                            <Link href={`/freelances/search?category=${category.slug}`} key={index}>
+                            <Link href={`/freelances/search?category=${category.name}`} key={index}>
                                 <div className="card">
                                     <div className={styles.categoryIcon}>{category.icon}</div>
                                     <h3 className="card-title">{category.name}</h3>
                                     <p className="card-description">{category.description}</p>
-                                    <span className="badge badge-primary">{category.count} experts</span>
+                                    <span className="badge badge-primary">
+                                        {stats[category.name] || 0} expert{(stats[category.name] || 0) > 1 ? 's' : ''}
+                                    </span>
                                 </div>
                             </Link>
                         ))}
@@ -165,73 +154,55 @@ export default function Home() {
             <section className={styles.ctaSection}>
                 <div className="container">
                     <div className={styles.ctaCard}>
-                        <h2>Prêt à démarrer votre projet ?</h2>
-                        <p>Rejoignez des centaines d'entreprises qui font confiance à Freelance Togo</p>
+                        <h2>Prêt à rejoindre notre communauté ?</h2>
+                        <p>Inscrivez-vous dès maintenant et commencez à trouver des opportunités</p>
                         <div className="flex gap-md items-center justify-center mt-4">
-                            <Link href="/auth/register?type=company" className="btn btn-primary btn-lg">
-                                Je cherche un freelance
-                            </Link>
-                            <Link href="/auth/register?type=freelance" className="btn btn-outline btn-lg">
+                            <Link href="/auth/register/freelance" className="btn btn-primary btn-lg">
                                 Je suis freelance
                             </Link>
                         </div>
                     </div>
                 </div>
             </section>
-
-            {/* Footer */}
-            <footer className={styles.footer}>
-                <div className="container">
-                    <div className="text-center">
-                        <p>&copy; 2026 Freelance Togo. Tous droits réservés.</p>
-                    </div>
-                </div>
-            </footer>
         </div>
     );
 }
 
 const categories = [
     {
-        name: 'Génie Informatique',
-        slug: 'genie-informatique',
+        name: 'Informatique & IT', // Changé pour correspondre à la DB
+        slug: 'informatique-it',
         description: 'Développeurs, Data Scientists, DevOps',
         icon: '💻',
-        count: 245
     },
     {
         name: 'Génie Civil',
         slug: 'genie-civil',
         description: 'BTP, Construction, Urbanisme',
         icon: '🏗️',
-        count: 189
     },
     {
         name: 'Génie Électrique',
         slug: 'genie-electrique',
         description: 'Électricité, Automatisme, Énergie',
         icon: '⚡',
-        count: 156
     },
     {
         name: 'Génie Mécanique',
         slug: 'genie-mecanique',
         description: 'CAO, Maintenance, Production',
         icon: '⚙️',
-        count: 134
     },
     {
         name: 'Télécommunications',
         slug: 'telecommunications',
         description: 'Réseaux, Systèmes, Infrastructure',
         icon: '📡',
-        count: 98
     },
     {
         name: 'Génie Industriel',
         slug: 'genie-industriel',
         description: 'Process, Qualité, Logistique',
         icon: '🏭',
-        count: 87
     },
 ];

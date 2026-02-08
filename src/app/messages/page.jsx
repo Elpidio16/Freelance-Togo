@@ -105,15 +105,6 @@ export default function MessagesPage() {
 
     return (
         <div className={styles.page}>
-            <nav className={styles.nav}>
-                <div className="container">
-                    <Link href="/" className={styles.logo}>
-                        <span className={styles.logoText}>Freelance</span>
-                        <span className={styles.logoAccent}>Togo</span>
-                    </Link>
-                </div>
-            </nav>
-
             <div className={styles.container}>
                 <div className={styles.header}>
                     <h1>Messages {totalUnread > 0 && <span className={styles.badge}>{totalUnread}</span>}</h1>

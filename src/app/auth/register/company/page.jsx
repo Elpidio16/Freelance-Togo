@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useToast } from '@/components/Toast/ToastProvider';
 import Input from '@/components/ui/Input';
 import PhoneInput from '@/components/ui/PhoneInput';
+import AuthLayout from '@/components/layout/AuthLayout';
 import styles from '../freelance/freelance.module.css'; // Réutiliser le même style
 
 export default function CompanyRegisterPage() {
@@ -125,16 +126,16 @@ export default function CompanyRegisterPage() {
     };
 
     return (
-        <div className={styles.page}>
+        <AuthLayout>
             <div className={styles.container}>
                 <div className={styles.formSection}>
                     <div className={styles.header}>
                         <Link href="/" className={styles.logo}>
-                            <span className={styles.logoText}>Freelance</span>
-                            <span className={styles.logoAccent}>Togo</span>
+                            <span className={styles.logoText}>Ingeni</span>
+                            <span className={styles.logoAccent}>Hub</span>
                         </Link>
                         <h1>Créer un compte entreprise</h1>
-                        <p>Trouvez les meilleurs freelances pour vos projets</p>
+                        <p>Trouvez les meilleurs ingénieurs pour vos projets</p>
                     </div>
 
                     <form onSubmit={handleSubmit} className={styles.form}>
@@ -293,7 +294,7 @@ export default function CompanyRegisterPage() {
                 </div>
 
                 <div className={styles.infoSection}>
-                    <h2>Pourquoi recruter sur Freelance Togo ?</h2>
+                    <h2>Pourquoi recruter sur IngeniHub ?</h2>
                     <div className={styles.features}>
                         <div className={styles.feature}>
                             <div className={styles.featureIcon}>🎯</div>
@@ -313,6 +314,6 @@ export default function CompanyRegisterPage() {
                     </div>
                 </div>
             </div>
-        </div>
+        </AuthLayout>
     );
 }

@@ -2,10 +2,21 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { signIn } from 'next-auth/react';
 import Link from 'next/link';
 import Input from '@/components/ui/Input';
 import PhoneInput from '@/components/ui/PhoneInput';
 import { useToast } from '@/components/Toast/ToastProvider';
+import AuthLayout from '@/components/layout/AuthLayout';
+import {
+    validateName,
+    validateEmail,
+    validatePhone,
+    validatePassword,
+    validatePasswordConfirmation,
+    validateCity,
+    getPasswordStrength
+} from '@/lib/validation';
 import styles from './freelance.module.css';
 
 export default function RegisterFreelancePage() {
@@ -23,34 +34,74 @@ export default function RegisterFreelancePage() {
 
     const [errors, setErrors] = useState({});
     const [isLoading, setIsLoading] = useState(false);
+    const [passwordStrength, setPasswordStrength] = useState({ score: 0, label: '', color: '' });
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+
+        // Clear error when user starts typing
+        if (errors[name]) {
+            setErrors(prev => ({ ...prev, [name]: '' }));
+        }
+
+        // Update password strength indicator
+        if (name === 'password') {
+            setPasswordStrength(getPasswordStrength(value));
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Validation
+        // Comprehensive validation
         const newErrors = {};
 
-        if (!formData.firstName) newErrors.firstName = 'Prénom requis';
-        if (!formData.lastName) newErrors.lastName = 'Nom requis';
-        if (!formData.email) {
-            newErrors.email = 'Email requis';
-        } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-            newErrors.email = 'Email invalide';
+        // Validate first name
+        const firstNameResult = validateName(formData.firstName);
+        if (!firstNameResult.valid) {
+            newErrors.firstName = firstNameResult.error;
         }
-        if (!formData.phone) newErrors.phone = 'Téléphone requis';
-        if (!formData.city) newErrors.city = 'Ville requise';
-        if (!formData.password) {
-            newErrors.password = 'Mot de passe requis';
-        } else if (formData.password.length < 6) {
-            newErrors.password = 'Le mot de passe doit contenir au moins 6 caractères';
+
+        // Validate last name
+        const lastNameResult = validateName(formData.lastName);
+        if (!lastNameResult.valid) {
+            newErrors.lastName = lastNameResult.error;
         }
-        if (formData.password !== formData.confirmPassword) {
-            newErrors.confirmPassword = 'Les mots de passe ne correspondent pas';
+
+        // Validate email
+        const emailResult = validateEmail(formData.email);
+        if (!emailResult.valid) {
+            newErrors.email = emailResult.error;
+        }
+
+        // Validate phone
+        const phoneResult = validatePhone(formData.phone);
+        if (!phoneResult.valid) {
+            newErrors.phone = phoneResult.error;
+        }
+
+        // Validate city
+        const cityResult = validateCity(formData.city);
+        if (!cityResult.valid) {
+            newErrors.city = cityResult.error;
+        }
+
+        // Validate password
+        const passwordResult = validatePassword(formData.password);
+        if (!passwordResult.valid) {
+            newErrors.password = passwordResult.error;
+        }
+
+        // Validate password confirmation
+        const confirmResult = validatePasswordConfirmation(formData.password, formData.confirmPassword);
+        if (!confirmResult.valid) {
+            newErrors.confirmPassword = confirmResult.error;
         }
 
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
-            addToast('Veuillez corriger les erreurs', 'error');
+            addToast('Veuillez corriger les erreurs dans le formulaire', 'error');
             return;
         }
 
@@ -91,35 +142,18 @@ export default function RegisterFreelancePage() {
         }
     };
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
-        // Clear error when user starts typing
-        if (errors[name]) {
-            setErrors(prev => ({ ...prev, [name]: '' }));
-        }
-    };
 
     return (
-        <div className={styles.page}>
-            <nav className={styles.nav}>
-                <div className="container">
-                    <Link href="/" className={styles.logo}>
-                        <span className={styles.logoText}>Freelance</span>
-                        <span className={styles.logoAccent}>Togo</span>
-                    </Link>
-                </div>
-            </nav>
-
+        <AuthLayout>
             <div className={styles.container}>
                 <div className={styles.formSection}>
                     <div className={styles.header}>
                         <Link href="/" className={styles.logo}>
-                            <span className={styles.logoText}>Freelance</span>
-                            <span className={styles.logoAccent}>Togo</span>
+                            <span className={styles.logoText}>Ingeni</span>
+                            <span className={styles.logoAccent}>Hub</span>
                         </Link>
-                        <h1>Créer mon profil de freelance</h1>
-                        <p>Rejoignez des centaines de freelances qui utilisent Freelance Togo</p>
+                        <h1>Créer mon profil d'ingénieur</h1>
+                        <p>Rejoignez des centaines d'ingénieurs qui utilisent IngeniHub</p>
                     </div>
 
                     <form onSubmit={handleSubmit} className={styles.form}>
@@ -209,20 +243,35 @@ export default function RegisterFreelancePage() {
                             {isLoading ? 'Création en cours...' : 'Créer mon compte'}
                         </button>
 
-                        <p className={styles.switchText}>
-                            Vous êtes une entreprise ? {' '}
-                            <Link href="/auth/register/company">Créer un compte entreprise</Link>
-                        </p>
-
                         <p className={styles.loginText}>
                             Vous avez déjà un compte ? {' '}
                             <Link href="/auth/login">Connectez-vous</Link>
                         </p>
+
+                        <div className={styles.divider}>
+                            <span>ou</span>
+                        </div>
+
+                        <div className={styles.socialButtons}>
+                            <button
+                                className={styles.googleBtn}
+                                type="button"
+                                onClick={() => signIn('google', { callbackUrl: '/' })}
+                            >
+                                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                                    <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4" />
+                                    <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z" fill="#34A853" />
+                                    <path d="M3.964 10.707c-.18-.54-.282-1.117-.282-1.707 0-.59.102-1.167.282-1.707V4.961H.957C.347 6.175 0 7.55 0 9s.348 2.825.957 4.039l3.007-2.332z" fill="#FBBC05" />
+                                    <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.961L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335" />
+                                </svg>
+                                Continuer avec Google
+                            </button>
+                        </div>
                     </form>
                 </div>
 
                 <div className={styles.infoSection}>
-                    <h2>Pourquoi rejoindre Freelance Togo ?</h2>
+                    <h2>Pourquoi rejoindre IngeniHub ?</h2>
                     <div className={styles.features}>
                         <div className={styles.feature}>
                             <div className={styles.featureIcon}>💼</div>
@@ -242,6 +291,6 @@ export default function RegisterFreelancePage() {
                     </div>
                 </div>
             </div>
-        </div>
+        </AuthLayout>
     );
 }

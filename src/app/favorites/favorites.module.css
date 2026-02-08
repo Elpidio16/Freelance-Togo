@@ -16,11 +16,11 @@
 }
 
 .logoText {
-    color: var(--text-primary);
+    color: var(--color-text);
 }
 
 .logoAccent {
-    color: var(--primary-color);
+    color: var(--color-primary);
 }
 
 .container {
@@ -43,7 +43,7 @@
 }
 
 .header p {
-    color: var(--text-tertiary);
+    color: var(--color-text-tertiary);
 }
 
 /* Filters */
@@ -60,7 +60,7 @@
 .poolTab {
     padding: 0.75rem 1.5rem;
     background: white;
-    border: 2px solid var(--border-color);
+    border: 2px solid var(--color-border);
     border-radius: var(--radius-md);
     font-weight: 600;
     cursor: pointer;
@@ -68,11 +68,11 @@
 }
 
 .poolTab:hover {
-    border-color: var(--primary-color);
+    border-color: var(--color-primary);
 }
 
 .poolTab.active {
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
     color: white;
     border-color: transparent;
 }
@@ -108,7 +108,7 @@
     width: 60px;
     height: 60px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
     color: white;
     display: flex;
     align-items: center;
@@ -126,24 +126,24 @@
 .name {
     font-size: 1.25rem;
     font-weight: 700;
-    color: var(--text-primary);
+    color: var(--color-text);
     text-decoration: none;
     display: block;
     margin-bottom: 0.25rem;
 }
 
 .name:hover {
-    color: var(--primary-color);
+    color: var(--color-primary);
 }
 
 .jobTitle {
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     margin: 0 0 0.25rem 0;
     font-size: 0.95rem;
 }
 
 .location {
-    color: var(--text-tertiary);
+    color: var(--color-text-tertiary);
     font-size: 0.85rem;
     margin: 0;
 }
@@ -158,7 +158,7 @@
 .skill {
     padding: 0.4rem 0.8rem;
     background: #fef5f1;
-    color: var(--primary-color);
+    color: var(--color-primary);
     border-radius: var(--radius-sm);
     font-size: 0.85rem;
     font-weight: 600;
@@ -166,8 +166,8 @@
 
 .skillMore {
     padding: 0.4rem 0.8rem;
-    background: var(--bg-tertiary);
-    color: var(--text-tertiary);
+    background: var(--color-surface);
+    color: var(--color-text-tertiary);
     border-radius: var(--radius-sm);
     font-size: 0.85rem;
 }
@@ -177,7 +177,7 @@
     gap: 1.5rem;
     margin-bottom: 1rem;
     padding-bottom: 1rem;
-    border-bottom: 1px solid var(--bg-tertiary);
+    border-bottom: 1px solid var(--color-surface);
     font-size: 0.9rem;
 }
 
@@ -186,7 +186,7 @@
 }
 
 .rate {
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     font-weight: 600;
 }
 
@@ -196,11 +196,11 @@
     border-radius: var(--radius-sm);
     margin-bottom: 1rem;
     font-size: 0.9rem;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
 }
 
 .notes strong {
-    color: var(--text-primary);
+    color: var(--color-text);
 }
 
 .cardActions {
@@ -213,7 +213,7 @@
     top: 1rem;
     right: 1rem;
     padding: 0.5rem 1rem;
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
     color: white;
     border-radius: var(--radius-sm);
     font-size: 0.8rem;
@@ -240,7 +240,7 @@
 }
 
 .empty p {
-    color: var(--text-tertiary);
+    color: var(--color-text-tertiary);
     margin-bottom: 2rem;
 }
 
@@ -250,7 +250,7 @@
     align-items: center;
     min-height: 100vh;
     font-size: 1.25rem;
-    color: var(--text-tertiary);
+    color: var(--color-text-tertiary);
 }
 
 @media (max-width: 768px) {

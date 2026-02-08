@@ -31,6 +31,17 @@ const UserSchema = new mongoose.Schema({
         type: Date,
         default: null,
     },
+    // Security fields
+    loginAttempts: {
+        type: Number,
+        default: 0,
+    },
+    lockUntil: {
+        type: Date,
+    },
+    lastLogin: {
+        type: Date,
+    },
     createdAt: {
         type: Date,
         default: Date.now,

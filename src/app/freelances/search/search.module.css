@@ -1,6 +1,6 @@
 .page {
     min-height: 100vh;
-    background: linear-gradient(135deg, #fefaf7 0%, #fef5f0 30%, #fdeee7 60%, #fce6db 100%);
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 30%, #bfdbfe 60%, #93c5fd 100%);
 }
 
 .nav {
@@ -20,11 +20,11 @@
 }
 
 .logoText {
-    color: var(--text-primary);
+    color: var(--color-text);
 }
 
 .logoAccent {
-    color: var(--primary-color);
+    color: var(--color-primary);
 }
 
 .container {
@@ -41,13 +41,13 @@
 .header h1 {
     font-size: 2.5rem;
     font-weight: 800;
-    color: var(--text-primary);
+    color: var(--color-text);
     margin-bottom: 0.5rem;
 }
 
 .header p {
     font-size: 1.1rem;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
 }
 
 /* Filters */
@@ -66,7 +66,7 @@
 .searchInput {
     width: 100%;
     padding: 1rem 1.5rem;
-    border: 2px solid var(--border-color);
+    border: 2px solid var(--color-border);
     border-radius: var(--radius-md);
     font-size: 1rem;
     transition: all 0.3s ease;
@@ -74,7 +74,7 @@
 
 .searchInput:focus {
     outline: none;
-    border-color: var(--primary-color);
+    border-color: var(--color-primary);
     box-shadow: 0 0 0 3px rgba(230, 126, 80, 0.1);
 }
 
@@ -87,7 +87,7 @@
 
 .select {
     padding: 0.75rem 1rem;
-    border: 2px solid var(--border-color);
+    border: 2px solid var(--color-border);
     border-radius: var(--radius-md);
     font-size: 0.95rem;
     background: white;
@@ -97,7 +97,7 @@
 
 .select:focus {
     outline: none;
-    border-color: var(--primary-color);
+    border-color: var(--color-primary);
 }
 
 .rateFilter {
@@ -109,29 +109,29 @@
 .rateInput {
     width: 150px;
     padding: 0.75rem 1rem;
-    border: 2px solid var(--border-color);
+    border: 2px solid var(--color-border);
     border-radius: var(--radius-md);
     font-size: 0.95rem;
 }
 
 .rateInput:focus {
     outline: none;
-    border-color: var(--primary-color);
+    border-color: var(--color-primary);
 }
 
 .resetBtn {
     padding: 0.75rem 1.5rem;
-    background: var(--bg-tertiary);
+    background: var(--color-surface);
     border: none;
     border-radius: var(--radius-md);
     font-weight: 600;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
 .resetBtn:hover {
-    background: var(--primary-color);
+    background: var(--color-primary);
     color: white;
 }
 
@@ -147,7 +147,7 @@
 .resultsHeader p {
     font-size: 1.1rem;
     font-weight: 600;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
 }
 
 .grid {
@@ -170,7 +170,7 @@
 .card:hover {
     transform: translateY(-4px);
     box-shadow: var(--shadow-lg);
-    border-color: var(--primary-color);
+    border-color: var(--color-primary);
 }
 
 .cardHeader {
@@ -189,7 +189,7 @@
 .avatarPlaceholder {
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
     display: flex;
     align-items: center;
     justify-content: center;
@@ -201,12 +201,12 @@
 .cardInfo h3 {
     font-size: 1.25rem;
     font-weight: 700;
-    color: var(--text-primary);
+    color: var(--color-text);
     margin-bottom: 0.25rem;
 }
 
 .title {
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     font-size: 0.95rem;
 }
 
@@ -223,7 +223,7 @@
 }
 
 .reviews {
-    color: var(--text-tertiary);
+    color: var(--color-text-tertiary);
     font-size: 0.9rem;
 }
 
@@ -236,16 +236,16 @@
 
 .skill {
     padding: 0.4rem 0.8rem;
-    background: var(--bg-tertiary);
+    background: var(--color-surface);
     border-radius: var(--radius-sm);
     font-size: 0.85rem;
-    color: var(--text-primary);
+    color: var(--color-text);
     font-weight: 500;
 }
 
 .skillMore {
     padding: 0.4rem 0.8rem;
-    background: var(--primary-color);
+    background: var(--color-primary);
     color: white;
     border-radius: var(--radius-sm);
     font-size: 0.85rem;
@@ -257,18 +257,18 @@
     justify-content: space-between;
     align-items: center;
     padding-top: 1rem;
-    border-top: 1px solid var(--bg-tertiary);
+    border-top: 1px solid var(--color-surface);
     margin-bottom: 0.75rem;
 }
 
 .location {
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     font-size: 0.9rem;
 }
 
 .rate {
     font-weight: 700;
-    color: var(--primary-color);
+    color: var(--color-primary);
     font-size: 1rem;
 }
 
@@ -308,7 +308,7 @@
 
 .noResults p {
     font-size: 1.2rem;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     margin-bottom: 1.5rem;
 }
 

@@ -32,6 +32,18 @@ const NotificationSchema = new mongoose.Schema({
     readAt: {
         type: Date,
     },
+    // Email notification tracking
+    emailSent: {
+        type: Boolean,
+        default: false,
+    },
+    emailSentAt: {
+        type: Date,
+    },
+    category: {
+        type: String,
+        enum: ['message', 'project', 'application', 'review', 'system'],
+    },
     metadata: {
         type: Map,
         of: String,

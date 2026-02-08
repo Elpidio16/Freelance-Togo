@@ -15,6 +15,18 @@ const FreelanceProfileSchema = new mongoose.Schema({
         type: String,
         maxlength: 1000,
     },
+    category: {
+        type: String,
+        enum: [
+            'Informatique & IT',
+            'Génie Civil',
+            'Génie Électrique',
+            'Génie Mécanique',
+            'Télécommunications',
+            'Génie Industriel'
+        ],
+        required: true,
+    },
     skills: [{
         type: String,
     }],

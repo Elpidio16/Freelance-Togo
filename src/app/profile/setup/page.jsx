@@ -6,6 +6,12 @@ import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useToast } from '@/components/Toast/ToastProvider';
 import Input from '@/components/ui/Input';
+import {
+    validateSocialLink,
+    validateCertificationId,
+    validateCertificationUrl,
+    CERTIFICATION_ISSUERS
+} from '@/lib/validation';
 import styles from './profile-setup.module.css';
 
 export default function ProfileSetupPage() {
@@ -19,6 +25,7 @@ export default function ProfileSetupPage() {
         // Étape 1 : Infos de base
         title: '',
         bio: '',
+        category: '',
         hourlyRate: '',
         dailyRate: '',
         availability: 'disponible',
@@ -151,61 +158,33 @@ export default function ProfileSetupPage() {
             return;
         }
 
-        // Validation de l'émetteur (min 2 caractères, max 100)
-        if (!currentCertification.issuer || currentCertification.issuer.trim().length < 2) {
-            addToast('L\'organisme émetteur doit contenir au moins 2 caractères', 'error');
-            return;
-        }
-        if (currentCertification.issuer.length > 100) {
-            addToast('Le nom de l\'organisme est trop long (max 100 caractères)', 'error');
+        // Validation de l'émetteur
+        if (!currentCertification.issuer || currentCertification.issuer === 'Autre' || currentCertification.issuer.trim().length < 2) {
+            addToast('Veuillez sélectionner ou saisir un organisme émetteur valide', 'error');
             return;
         }
 
-        // Validation de la date (si fournie) - format texte mais sensé
+        // Validation de la date
         if (currentCertification.date && currentCertification.date.trim()) {
             const dateText = currentCertification.date.trim();
-            if (dateText.length < 4) {
-                addToast('La date doit être plus précise (ex: Décembre 2023, 2023, etc.)', 'error');
-                return;
-            }
-            // Vérifier qu'il y a au moins un chiffre (pour l'année)
-            if (!/\d/.test(dateText)) {
-                addToast('La date doit contenir au moins une année', 'error');
+            if (dateText.length < 4 || !/\d/.test(dateText)) {
+                addToast('Veuillez saisir une date valide (ex: 2023)', 'error');
                 return;
             }
         }
 
-        // Validation de l'ID de certification (si fourni) - alphanumérique + tirets/underscores
-        if (currentCertification.credentialId && currentCertification.credentialId.trim()) {
-            const credId = currentCertification.credentialId.trim();
-            if (credId.length < 3) {
-                addToast('L\'ID de certification doit contenir au moins 3 caractères', 'error');
-                return;
-            }
-            if (!/^[a-zA-Z0-9\-_]+$/.test(credId)) {
-                addToast('L\'ID de certification ne doit contenir que des lettres, chiffres, tirets et underscores', 'error');
-                return;
-            }
+        // Validation de l'ID via la bibliothèque
+        const idResult = validateCertificationId(currentCertification.credentialId);
+        if (!idResult.valid) {
+            addToast(idResult.error, 'error');
+            return;
         }
 
-        // Validation stricte de l'URL (si fournie)
-        if (currentCertification.url && currentCertification.url.trim()) {
-            const url = currentCertification.url.trim();
-            try {
-                const urlObj = new URL(url);
-                if (urlObj.protocol !== 'http:' && urlObj.protocol !== 'https:') {
-                    addToast('L\'URL doit commencer par http:// ou https://', 'error');
-                    return;
-                }
-                // Vérifier qu'il y a bien un domaine
-                if (!urlObj.hostname || urlObj.hostname.length < 3) {
-                    addToast('L\'URL semble invalide (domaine manquant)', 'error');
-                    return;
-                }
-            } catch (e) {
-                addToast('L\'URL du certificat n\'est pas valide (ex: https://example.com/cert)', 'error');
-                return;
-            }
+        // Validation de l'URL via la bibliothèque
+        const urlResult = validateCertificationUrl(currentCertification.url);
+        if (!urlResult.valid) {
+            addToast(urlResult.error, 'error');
+            return;
         }
 
         // Tout est valide, on ajoute
@@ -252,6 +231,7 @@ export default function ProfileSetupPage() {
                 body: JSON.stringify({
                     title: formData.title,
                     bio: formData.bio,
+                    category: formData.category,
                     skills: skillsArray,
                     hourlyRate: formData.hourlyRate ? parseInt(formData.hourlyRate) : 0,
                     dailyRate: formData.dailyRate ? parseInt(formData.dailyRate) : 0,
@@ -293,8 +273,8 @@ export default function ProfileSetupPage() {
 
     const nextStep = () => {
         // Étape 1: Infos de base
-        if (step === 1 && (!formData.title || !formData.bio)) {
-            addToast('Veuillez remplir le titre et la bio', 'error');
+        if (step === 1 && (!formData.title || !formData.bio || !formData.category)) {
+            addToast('Veuillez remplir le titre, la bio et la catégorie', 'error');
             return;
         }
 
@@ -314,17 +294,36 @@ export default function ProfileSetupPage() {
         if (step === 4) {
             const hasAtLeastOneLink = Object.values(formData.socialLinks).some(link => link && link.trim() !== '');
             if (!hasAtLeastOneLink) {
-                addToast('Veuillez ajouter au moins un lien social', 'error');
+                addToast('Veuillez ajouter au moins un lien social professionnel', 'error');
                 return;
             }
 
-            // Valider les URLs fournies
+            // Valider les URLs via la bibliothèque
             for (const [platform, url] of Object.entries(formData.socialLinks)) {
-                if (url && url.trim() !== '' && !isValidUrl(url)) {
-                    addToast(`Le lien ${platform} n'est pas une URL valide`, 'error');
+                const result = validateSocialLink(url, platform);
+                if (!result.valid) {
+                    addToast(result.error, 'error');
                     return;
                 }
             }
+        }
+
+        // Étape 5: Expérience (OBLIGATOIRE - min 1)
+        if (step === 5 && formData.experiences.length === 0) {
+            addToast('Veuillez ajouter au moins une expérience professionnelle', 'error');
+            return;
+        }
+
+        // Étape 6: Formation (OBLIGATOIRE - min 1)
+        if (step === 6 && formData.education.length === 0) {
+            addToast('Veuillez ajouter au moins une formation', 'error');
+            return;
+        }
+
+        // Étape 7: Langues (OBLIGATOIRE - min 1)
+        if (step === 7 && formData.languages.length === 0) {
+            addToast('Veuillez ajouter au moins une langue', 'error');
+            return;
         }
 
         setStep(step + 1);
@@ -334,15 +333,6 @@ export default function ProfileSetupPage() {
 
     return (
         <div className={styles.page}>
-            <nav className={styles.nav}>
-                <div className="container">
-                    <Link href="/" className={styles.logo}>
-                        <span className={styles.logoText}>Freelance</span>
-                        <span className={styles.logoAccent}>Togo</span>
-                    </Link>
-                </div>
-            </nav>
-
             <div className={styles.container}>
                 <div className={styles.header}>
                     <h1>Créez votre profil de freelance</h1>
@@ -395,6 +385,24 @@ export default function ProfileSetupPage() {
                                     value={formData.dailyRate}
                                     onChange={handleChange}
                                 />
+                            </div>
+                            <div className={styles.inputGroup}>
+                                <label>Catégorie d'ingénierie *</label>
+                                <select
+                                    name="category"
+                                    value={formData.category}
+                                    onChange={handleChange}
+                                    className={styles.select}
+                                    required
+                                >
+                                    <option value="">Sélectionnez votre spécialisation</option>
+                                    <option value="Informatique & IT">Informatique & IT</option>
+                                    <option value="Génie Civil">Génie Civil</option>
+                                    <option value="Génie Électrique">Génie Électrique</option>
+                                    <option value="Génie Mécanique">Génie Mécanique</option>
+                                    <option value="Télécommunications">Télécommunications</option>
+                                    <option value="Génie Industriel">Génie Industriel</option>
+                                </select>
                             </div>
                             <div className={styles.inputGroup}>
                                 <label>Disponibilité</label>
@@ -468,14 +476,36 @@ export default function ProfileSetupPage() {
                                     maxLength={100}
                                     required
                                 />
-                                <Input
-                                    label="Organisme émetteur"
-                                    placeholder="Ex: Amazon Web Services"
-                                    value={currentCertification.issuer}
-                                    onChange={(e) => setCurrentCertification({ ...currentCertification, issuer: e.target.value })}
-                                    maxLength={100}
-                                    required
-                                />
+                                <div className={styles.inputGroup}>
+                                    <label>Organisme émetteur *</label>
+                                    <select
+                                        className={styles.select}
+                                        value={CERTIFICATION_ISSUERS.includes(currentCertification.issuer) ? currentCertification.issuer : (currentCertification.issuer ? 'Autre' : '')}
+                                        onChange={(e) => {
+                                            const value = e.target.value;
+                                            setCurrentCertification({
+                                                ...currentCertification,
+                                                issuer: value === 'Autre' ? '' : value
+                                            });
+                                        }}
+                                        required
+                                    >
+                                        <option value="">Sélectionnez un organisme</option>
+                                        {CERTIFICATION_ISSUERS.map(issuer => (
+                                            <option key={issuer} value={issuer}>{issuer}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                {(!CERTIFICATION_ISSUERS.includes(currentCertification.issuer) || currentCertification.issuer === 'Autre') && (
+                                    <Input
+                                        label="Nom de l'organisme (Autre) *"
+                                        placeholder="Saisissez l'organisme émetteur"
+                                        value={currentCertification.issuer === 'Autre' ? '' : currentCertification.issuer}
+                                        onChange={(e) => setCurrentCertification({ ...currentCertification, issuer: e.target.value })}
+                                        required
+                                    />
+                                )}
                                 <div className={styles.row}>
                                     <Input
                                         label="Date d'obtention"
@@ -548,7 +578,8 @@ export default function ProfileSetupPage() {
                     {/* Étape 5 : Expérience */}
                     {step === 5 && (
                         <div className={styles.step}>
-                            <h2>Expérience professionnelle (optionnel)</h2>
+                            <h2>Expérience professionnelle *</h2>
+                            <p className={styles.hint}>⚠️ Ajoutez au moins une expérience significative</p>
 
                             {formData.experiences.length > 0 && (
                                 <div className={styles.list}>
@@ -607,7 +638,8 @@ export default function ProfileSetupPage() {
                     {/* Étape 6 : Formation */}
                     {step === 6 && (
                         <div className={styles.step}>
-                            <h2>Formation (optionnel)</h2>
+                            <h2>Formation / Études *</h2>
+                            <p className={styles.hint}>⚠️ Ajoutez au moins un diplôme ou une formation</p>
 
                             {formData.education.length > 0 && (
                                 <div className={styles.list}>
@@ -665,7 +697,8 @@ export default function ProfileSetupPage() {
                     {/* Étape 7 : Langues */}
                     {step === 7 && (
                         <div className={styles.step}>
-                            <h2>Langues (optionnel)</h2>
+                            <h2>Langues *</h2>
+                            <p className={styles.hint}>⚠️ Ajoutez au moins une langue maîtrisée</p>
 
                             {formData.languages.length > 0 && (
                                 <div className={styles.list}>

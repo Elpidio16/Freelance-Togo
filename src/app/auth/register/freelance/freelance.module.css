@@ -16,7 +16,7 @@
 .nav {
     background: white;
     padding: 1.5rem 0;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--color-border);
 }
 
 .logo {
@@ -26,11 +26,11 @@
 }
 
 .logoText {
-    color: var(--text-primary);
+    color: var(--color-text);
 }
 
 .logoAccent {
-    color: var(--primary-color);
+    color: var(--color-primary);
 }
 
 .formSection {
@@ -47,12 +47,12 @@
 .header h1 {
     font-size: 2rem;
     font-weight: 700;
-    color: var(--text-primary);
+    color: var(--color-text);
     margin-bottom: 0.5rem;
 }
 
 .header p {
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
 }
 
 .form {
@@ -69,7 +69,7 @@
 
 .formGroup>label {
     font-weight: 600;
-    color: var(--text-primary);
+    color: var(--color-text);
     font-size: 1.05rem;
 }
 
@@ -87,25 +87,25 @@
 
 .inputGroup label {
     font-weight: 500;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     font-size: 0.9rem;
 }
 
 .select {
     width: 100%;
     padding: 0.875rem 1rem;
-    border: 2px solid var(--border-color);
+    border: 2px solid var(--color-border);
     border-radius: var(--radius-md);
     font-size: 1rem;
     background: white;
-    color: var(--text-primary);
+    color: var(--color-text);
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
 .select:focus {
     outline: none;
-    border-color: var(--primary-color);
+    border-color: var(--color-primary);
     box-shadow: 0 0 0 3px rgba(230, 126, 80, 0.1);
 }
 
@@ -122,14 +122,14 @@
 .switchText,
 .loginText {
     text-align: center;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     margin-top: 1rem;
     font-size: 0.95rem;
 }
 
 .switchText a,
 .loginText a {
-    color: var(--primary-color);
+    color: var(--color-primary);
     font-weight: 600;
     text-decoration: none;
 }
@@ -153,7 +153,7 @@
     font-size: 1.5rem;
     font-weight: 700;
     margin-bottom: 2rem;
-    color: var(--text-primary);
+    color: var(--color-text);
 }
 
 .features {
@@ -174,12 +174,12 @@
 .feature h3 {
     font-size: 1.1rem;
     font-weight: 700;
-    color: var(--text-primary);
+    color: var(--color-text);
     margin-bottom: 0.5rem;
 }
 
 .feature p {
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     line-height: 1.6;
 }
 

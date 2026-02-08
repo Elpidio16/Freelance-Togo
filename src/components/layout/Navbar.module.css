@@ -1,0 +1,54 @@
+.nav {
+    padding: 1rem 0;
+    background: white;
+    border-bottom: 1px solid #e5e7eb;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.logoText {
+    color: var(--primary-color);
+}
+
+.logoAccent {
+    color: var(--text-color);
+}
+
+.navLink {
+    color: var(--text-color);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: color 0.2s;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+}
+
+.navLink:hover {
+    color: var(--primary-color);
+}
+
+.userMenu {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.userName {
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+@media (max-width: 768px) {
+    .navLink {
+        display: none;
+    }
+}

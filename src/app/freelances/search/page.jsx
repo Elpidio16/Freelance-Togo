@@ -4,7 +4,12 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import styles from './search.module.css';
 
-const cities = ['Toutes les villes', 'Lomé', 'Kara', 'Sokodé', 'Atakpamé', 'Kpalimé'];
+const cities = [
+    'Lomé', 'Kara', 'Sokodé', 'Atakpamé', 'Kpalimé',
+    'Dapaong', 'Tsévié', 'Aného', 'Bassar', 'Tabligbo', 'Niamtougou',
+    'Bafilo', 'Kandé', 'Vogan', 'Badou', 'Mango', 'Pagouda',
+    'Sotouboua', 'Blitta', 'Tandjouaré', 'Cinkassé', 'Kévé', 'Agou'
+];
 
 export default function FreelanceSearchPage() {
     const [freelances, setFreelances] = useState([]);
@@ -19,7 +24,7 @@ export default function FreelanceSearchPage() {
     // Charger les freelances depuis l'API
     useEffect(() => {
         fetchFreelances();
-    }, [searchQuery, selectedCity, selectedAvailability, minRate, maxRate]);
+    }, [searchQuery, selectedCategory, selectedCity, selectedAvailability, minRate, maxRate]);
 
     const fetchFreelances = async () => {
         setLoading(true);
@@ -27,6 +32,7 @@ export default function FreelanceSearchPage() {
             // Construire les query params
             const params = new URLSearchParams();
             if (searchQuery) params.append('search', searchQuery);
+            if (selectedCategory) params.append('category', selectedCategory);
             if (selectedCity && selectedCity !== 'Toutes les villes') params.append('city', selectedCity);
             if (selectedAvailability) params.append('availability', selectedAvailability);
             if (minRate) params.append('minRate', minRate);
@@ -60,16 +66,6 @@ export default function FreelanceSearchPage() {
 
     return (
         <div className={styles.page}>
-            {/* Navigation */}
-            <nav className={styles.nav}>
-                <div className="container">
-                    <Link href="/" className={styles.logo}>
-                        <span className={styles.logoText}>Freelance</span>
-                        <span className={styles.logoAccent}>Togo</span>
-                    </Link>
-                </div>
-            </nav>
-
             <div className={styles.container}>
                 {/* Header */}
                 <div className={styles.header}>
@@ -90,6 +86,20 @@ export default function FreelanceSearchPage() {
                     </div>
 
                     <div className={styles.filters}>
+                        <select
+                            value={selectedCategory}
+                            onChange={(e) => setSelectedCategory(e.target.value)}
+                            className={styles.select}
+                        >
+                            <option value="">Toutes les catégories</option>
+                            <option value="Informatique & IT">Informatique & IT</option>
+                            <option value="Génie Civil">Génie Civil</option>
+                            <option value="Génie Électrique">Génie Électrique</option>
+                            <option value="Génie Mécanique">Génie Mécanique</option>
+                            <option value="Télécommunications">Télécommunications</option>
+                            <option value="Génie Industriel">Génie Industriel</option>
+                        </select>
+
                         <select
                             value={selectedCity}
                             onChange={(e) => setSelectedCity(e.target.value)}

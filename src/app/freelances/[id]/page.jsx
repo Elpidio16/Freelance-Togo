@@ -54,14 +54,6 @@ export default function FreelanceProfilePage() {
     if (loading) {
         return (
             <div className={styles.page}>
-                <nav className={styles.nav}>
-                    <div className="container">
-                        <Link href="/" className={styles.logo}>
-                            <span className={styles.logoText}>Freelance</span>
-                            <span className={styles.logoAccent}>Togo</span>
-                        </Link>
-                    </div>
-                </nav>
                 <div className={styles.container}>
                     <div className={styles.loading}>
                         <p>Chargement...</p>
@@ -74,14 +66,6 @@ export default function FreelanceProfilePage() {
     if (error || !freelance) {
         return (
             <div className={styles.page}>
-                <nav className={styles.nav}>
-                    <div className="container">
-                        <Link href="/" className={styles.logo}>
-                            <span className={styles.logoText}>Freelance</span>
-                            <span className={styles.logoAccent}>Togo</span>
-                        </Link>
-                    </div>
-                </nav>
                 <div className={styles.container}>
                     <h1>Freelance non trouvé</h1>
                     <Link href="/freelances/search" className="btn btn-primary">
@@ -94,16 +78,6 @@ export default function FreelanceProfilePage() {
 
     return (
         <div className={styles.page}>
-            {/* Navigation */}
-            <nav className={styles.nav}>
-                <div className="container">
-                    <Link href="/" className={styles.logo}>
-                        <span className={styles.logoText}>Freelance</span>
-                        <span className={styles.logoAccent}>Togo</span>
-                    </Link>
-                </div>
-            </nav>
-
             <div className={styles.container}>
                 {/* Header */}
                 <div className={styles.profileHeader}>
