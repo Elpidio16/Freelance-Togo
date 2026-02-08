@@ -316,79 +316,79 @@ export default function FreelanceProfilePage() {
                         </section>
                     )}
 
-                    {/* Reviews */
-                        <section className={styles.section}>
-                            <h2>Évaluations ({reviewStats?.totalReviews || 0})</h2>
+                    {/* Reviews */}
+                    <section className={styles.section}>
+                        <h2>Évaluations ({reviewStats?.totalReviews || 0})</h2>
 
-                            {reviewStats && reviewStats.totalReviews > 0 ? (
-                                <>
-                                    <div className={styles.reviewsStats}>
-                                        <div className={styles.averageRating}>
-                                            <div className={styles.ratingNumber}>{reviewStats.averageRating}</div>
-                                            <div className={styles.stars}>
-                                                {[1, 2, 3, 4, 5].map((star) => (
-                                                    <span key={star} className={star <= Math.round(reviewStats.averageRating) ? styles.starFilled : styles.starEmpty}>
-                                                        ⭐
-                                                    </span>
-                                                ))}
-                                            </div>
-                                            <div className={styles.reviewCount}>
-                                                Basé sur {reviewStats.totalReviews} avis
-                                            </div>
-                                        </div>
-
-                                        <div className={styles.ratingBars}>
-                                            {[5, 4, 3, 2, 1].map((rating) => (
-                                                <div key={rating} className={styles.ratingBar}>
-                                                    <span>{rating}★</span>
-                                                    <div className={styles.barContainer}>
-                                                        <div
-                                                            className={styles.barFill}
-                                                            style={{
-                                                                width: `${reviewStats.totalReviews > 0 ? (reviewStats.ratingDistribution[rating] / reviewStats.totalReviews) * 100 : 0}%`
-                                                            }}
-                                                        ></div>
-                                                    </div>
-                                                    <span className={styles.barCount}>{reviewStats.ratingDistribution[rating]}</span>
-                                                </div>
+                        {reviewStats && reviewStats.totalReviews > 0 ? (
+                            <>
+                                <div className={styles.reviewsStats}>
+                                    <div className={styles.averageRating}>
+                                        <div className={styles.ratingNumber}>{reviewStats.averageRating}</div>
+                                        <div className={styles.stars}>
+                                            {[1, 2, 3, 4, 5].map((star) => (
+                                                <span key={star} className={star <= Math.round(reviewStats.averageRating) ? styles.starFilled : styles.starEmpty}>
+                                                    ⭐
+                                                </span>
                                             ))}
+                                        </div>
+                                        <div className={styles.reviewCount}>
+                                            Basé sur {reviewStats.totalReviews} avis
                                         </div>
                                     </div>
 
-                                    <div className={styles.reviewsList}>
-                                        {reviews.map((review) => (
-                                            <div key={review._id} className={styles.reviewCard}>
-                                                <div className={styles.reviewHeader}>
-                                                    <div>
-                                                        <h4>{review.company.name}</h4>
-                                                        <p className={styles.reviewProject}>{review.project.title}</p>
-                                                    </div>
-                                                    <div className={styles.reviewRating}>
-                                                        {[1, 2, 3, 4, 5].map((star) => (
-                                                            <span key={star} className={star <= review.rating ? styles.starFilled : styles.starEmpty}>
-                                                                ⭐
-                                                            </span>
-                                                        ))}
-                                                    </div>
+                                    <div className={styles.ratingBars}>
+                                        {[5, 4, 3, 2, 1].map((rating) => (
+                                            <div key={rating} className={styles.ratingBar}>
+                                                <span>{rating}★</span>
+                                                <div className={styles.barContainer}>
+                                                    <div
+                                                        className={styles.barFill}
+                                                        style={{
+                                                            width: `${(reviewStats.breakdown[rating] / reviewStats.totalReviews) * 100}%`
+                                                        }}
+                                                    />
                                                 </div>
-                                                <p className={styles.reviewComment}>{review.comment}</p>
-                                                <div className={styles.reviewDate}>
-                                                    {new Date(review.createdAt).toLocaleDateString('fr-FR', {
-                                                        day: 'numeric',
-                                                        month: 'long',
-                                                        year: 'numeric',
-                                                    })}
-                                                </div>
+                                                <span className={styles.barCount}>{reviewStats.breakdown[rating]}</span>
                                             </div>
                                         ))}
                                     </div>
-                                </>
-                            ) : (
-                                <div className={styles.noReviews}>
-                                    <p>Aucune évaluation pour le moment</p>
                                 </div>
-                            )}
-                        </section>
+
+                                <div className={styles.reviewsList}>
+                                    {reviews.map((review) => (
+                                        <div key={review._id} className={styles.reviewCard}>
+                                            <div className={styles.reviewHeader}>
+                                                <div>
+                                                    <h4>{review.company.name}</h4>
+                                                    <p className={styles.reviewProject}>{review.project.title}</p>
+                                                </div>
+                                                <div className={styles.reviewRating}>
+                                                    {[1, 2, 3, 4, 5].map((star) => (
+                                                        <span key={star} className={star <= review.rating ? styles.starFilled : styles.starEmpty}>
+                                                            ⭐
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            <p className={styles.reviewComment}>{review.comment}</p>
+                                            <div className={styles.reviewDate}>
+                                                {new Date(review.createdAt).toLocaleDateString('fr-FR', {
+                                                    day: 'numeric',
+                                                    month: 'long',
+                                                    year: 'numeric',
+                                                })}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </>
+                        ) : (
+                            <div className={styles.noReviews}>
+                                <p>Aucune évaluation pour le moment</p>
+                            </div>
+                        )}
+                    </section>
                 </div>
             </div>
 
