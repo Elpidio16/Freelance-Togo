@@ -42,8 +42,8 @@ export default function DashboardPage() {
                         <div className={styles.cardIcon}>👤</div>
                         <h3>Profil</h3>
                         <p>Complétez votre profil professionnel</p>
-                        <Link href="/profile" className="btn btn-primary">
-                            Voir mon profil
+                        <Link href="/profile/view" className="btn btn-primary">
+                            👤 Voir mon profil
                         </Link>
                     </div>
 

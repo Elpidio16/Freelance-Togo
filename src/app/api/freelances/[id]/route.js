@@ -34,6 +34,19 @@ export async function GET(request, { params }) {
             );
         }
 
+        // Helper function to safely parse JSON fields
+        const safeParseJSON = (field) => {
+            if (!field) return null;
+            if (typeof field === 'string') {
+                try {
+                    return JSON.parse(field);
+                } catch (e) {
+                    return null;
+                }
+            }
+            return field;
+        };
+
         const freelance = {
             id: profile.id,
             name: `${profile.user.firstName} ${profile.user.lastName}`,
@@ -48,12 +61,12 @@ export async function GET(request, { params }) {
             skills: profile.skills || [],
             availability: profile.availability || 'disponible',
             completedProjects: profile.completedProjects || 0,
-            portfolio: profile.portfolio || [],
-            experience: profile.experience || [],
-            education: profile.education || [],
-            languages: profile.languages || [],
-            certifications: profile.certifications || [],
-            socialLinks: profile.socialLinks || {},
+            portfolio: safeParseJSON(profile.portfolio) || [],
+            experience: safeParseJSON(profile.experience) || [],
+            education: safeParseJSON(profile.education) || [],
+            languages: safeParseJSON(profile.languages) || [],
+            certifications: safeParseJSON(profile.certifications) || [],
+            socialLinks: safeParseJSON(profile.socialLinks) || {},
         };
 
         return NextResponse.json({ freelance }, { status: 200 });
