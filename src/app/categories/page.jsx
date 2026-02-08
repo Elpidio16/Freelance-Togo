@@ -1,54 +1,79 @@
 import Link from 'next/link';
 import styles from './categories.module.css';
+import prisma from '@/lib/prisma';
 
 export const metadata = {
     title: 'Catégories - IngeniHub',
     description: 'Découvrez toutes les catégories de services freelances disponibles au Togo',
 };
 
-export default function CategoriesPage() {
+async function getCategoryStats() {
+    try {
+        const stats = await prisma.freelanceProfile.groupBy({
+            by: ['category'],
+            _count: {
+                category: true
+            }
+        });
+
+        const statsMap = {};
+        stats.forEach(item => {
+            if (item.category) {
+                statsMap[item.category] = item._count.category;
+            }
+        });
+        return statsMap;
+    } catch (error) {
+        console.error('Error fetching category stats:', error);
+        return {};
+    }
+}
+
+export default async function CategoriesPage() {
+    const stats = await getCategoryStats();
+
     const categories = [
         {
             id: 'développement-web',
             name: 'Développement Web',
             icon: '💻',
             description: 'Sites web, applications web, e-commerce',
-            count: 45,
+            count: stats['Développement Web'] || 0,
         },
         {
             id: 'développement-mobile',
             name: 'Développement Mobile',
             icon: '📱',
             description: 'Applications iOS, Android, React Native',
-            count: 32,
+            count: stats['Développement Mobile'] || 0,
         },
         {
             id: 'design-graphique',
             name: 'Design Graphique',
             icon: '🎨',
             description: 'Logos, identité visuelle, illustrations',
-            count: 28,
+            count: stats['Design Graphique'] || 0,
         },
         {
             id: 'marketing-digital',
             name: 'Marketing Digital',
             icon: '📈',
             description: 'SEO, publicité en ligne, réseaux sociaux',
-            count: 21,
+            count: stats['Marketing Digital'] || 0,
         },
         {
             id: 'rédaction',
             name: 'Rédaction & Traduction',
             icon: '✍️',
             description: 'Articles, contenu web, traduction',
-            count: 18,
+            count: stats['Rédaction & Traduction'] || 0,
         },
         {
             id: 'data-science',
             name: 'Data Science & IA',
             icon: '🤖',
             description: 'Machine learning, analyse de données',
-            count: 15,
+            count: stats['Data Science & IA'] || 0,
         },
     ];
 
@@ -64,7 +89,7 @@ export default function CategoriesPage() {
                     {categories.map((category) => (
                         <Link
                             key={category.id}
-                            href={`/freelances/search?category=${category.id}`}
+                            href={`/freelances/search?category=${encodeURIComponent(category.name)}`}
                             className={styles.card}
                         >
                             <div className={styles.cardIcon}>{category.icon}</div>
