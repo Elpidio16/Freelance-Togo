@@ -89,10 +89,10 @@ export async function POST(request) {
         });
 
         // Envoyer l'email de vérification
-        const emailResult = await sendVerificationEmail(email, verificationToken);
+        const emailSent = await sendVerificationEmail(email, verificationToken);
 
-        if (!emailResult.success) {
-            console.error('Erreur envoi email:', emailResult.error);
+        if (!emailSent) {
+            console.error('⚠️ Attention: L\'email de vérification n\'a pas pu être envoyé à', email);
             // On ne bloque pas l'inscription, mais on log l'erreur
         }
 
@@ -105,9 +105,9 @@ export async function POST(request) {
         );
 
     } catch (error) {
-        console.error('Erreur lors de la création du compte:', error);
+        console.error('🚨 Erreur CRITIQUE lors de la création du compte:', error);
         return NextResponse.json(
-            { error: 'Une erreur est survenue lors de la création du compte' },
+            { error: 'Une erreur technique est survenue. Veuillez réessayer.' },
             { status: 500 }
         );
     }
