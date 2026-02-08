@@ -16,13 +16,15 @@ export async function sendEmail({ to, subject, html, replyTo }) {
       to,
       subject,
       html,
-      ...(replyTo && { replyTo }),
     });
 
+    // DEBUG: Log result
+    console.log(`📧 Tentative d'envoi à ${to} | Sujet: ${subject}`);
     if (error) {
-      console.error('❌ Erreur Resend:', error);
+      console.error('❌ Erreur Resend détaillée:', JSON.stringify(error, null, 2));
       return false;
     }
+    console.log('✅ ID Email Resend:', data?.id);
 
     console.log('✅ Email envoyé avec succès:', { to, subject, id: data?.id });
     return true;
