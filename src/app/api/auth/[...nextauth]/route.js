@@ -84,8 +84,8 @@ export const authOptions = {
     },
 
     callbacks: {
-        async jwt({ token, user }) {
-            // Ajouter les infos utilisateur au token lors de la connexion
+        async jwt({ token, user, trigger, session }) {
+            // 1. Initial Sign In
             if (user) {
                 token.id = user.id;
                 token.email = user.email;
@@ -93,11 +93,41 @@ export const authOptions = {
                 token.lastName = user.lastName;
                 token.role = user.role;
                 token.isVerified = user.isVerified;
+                return token;
             }
+
+            // 2. Subsequent requests - Verify user still exists in DB
+            if (token?.id) {
+                const dbUser = await prisma.user.findUnique({
+                    where: { id: token.id },
+                    select: {
+                        id: true,
+                        email: true,
+                        firstName: true,
+                        lastName: true,
+                        role: true,
+                        isVerified: true,
+                        password: true // We need this to invalidate if password changed (optional but good)
+                    }
+                });
+
+                // If user deleted or blocked, invalidate token
+                if (!dbUser) {
+                    return null;
+                }
+
+                // Sync latest data (e.g. if role changed)
+                token.role = dbUser.role;
+                token.isVerified = dbUser.isVerified;
+            }
+
             return token;
         },
 
         async session({ session, token }) {
+            // If token is invalid (null returned by jwt), session will be null/empty
+            if (!token) return null;
+
             // Ajouter les infos du token à la session
             if (token) {
                 session.user.id = token.id;
