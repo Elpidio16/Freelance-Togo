@@ -150,20 +150,22 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* CTA Section */}
-            <section className={styles.ctaSection}>
-                <div className="container">
-                    <div className={styles.ctaCard}>
-                        <h2>Prêt à rejoindre notre communauté ?</h2>
-                        <p>Inscrivez-vous dès maintenant et commencez à trouver des opportunités</p>
-                        <div className="flex gap-md items-center justify-center mt-4">
-                            <Link href="/auth/register/freelance" className="btn btn-primary btn-lg">
-                                Je suis ingénieur
-                            </Link>
+            {/* CTA Section - Only show for non-logged-in users */}
+            {!session && (
+                <section className={styles.ctaSection}>
+                    <div className="container">
+                        <div className={styles.ctaCard}>
+                            <h2>Prêt à rejoindre notre communauté ?</h2>
+                            <p>Inscrivez-vous dès maintenant et commencez à trouver des opportunités</p>
+                            <div className="flex gap-md items-center justify-center mt-4">
+                                <Link href="/auth/register/freelance" className="btn btn-primary btn-lg">
+                                    Je suis ingénieur
+                                </Link>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </section>
+                </section>
+            )}
         </div>
     );
 }
