@@ -221,79 +221,174 @@ export default function FreelanceProfilePage() {
                         </section>
                     )}
 
-                    {/* Reviews */}
-                    <section className={styles.section}>
-                        <h2>Évaluations ({reviewStats?.totalReviews || 0})</h2>
+                    {/* Certifications */}
+                    {freelance.certifications && freelance.certifications.length > 0 && (
+                        <section className={styles.section}>
+                            <h2>🎓 Certifications</h2>
+                            <div className={styles.certificationsGrid}>
+                                {freelance.certifications.map((cert, idx) => (
+                                    <div key={idx} className={styles.certificationCard}>
+                                        <h3>{cert.name}</h3>
+                                        <p className={styles.certIssuer}>{cert.issuer}</p>
+                                        {cert.date && <p className={styles.certDate}>📅 {cert.date}</p>}
+                                        {cert.credentialId && (
+                                            <p className={styles.certId}>
+                                                <strong>ID:</strong> {cert.credentialId}
+                                            </p>
+                                        )}
+                                        {cert.url && (
+                                            <a
+                                                href={cert.url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className={styles.certLink}
+                                            >
+                                                🔗 Vérifier la certification
+                                            </a>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
+                    )}
 
-                        {reviewStats && reviewStats.totalReviews > 0 ? (
-                            <>
-                                <div className={styles.reviewsStats}>
-                                    <div className={styles.averageRating}>
-                                        <div className={styles.ratingNumber}>{reviewStats.averageRating}</div>
-                                        <div className={styles.stars}>
-                                            {[1, 2, 3, 4, 5].map((star) => (
-                                                <span key={star} className={star <= Math.round(reviewStats.averageRating) ? styles.starFilled : styles.starEmpty}>
-                                                    ⭐
-                                                </span>
-                                            ))}
+                    {/* Liens sociaux */}
+                    {freelance.socialLinks && Object.values(freelance.socialLinks).some(link => link) && (
+                        <section className={styles.section}>
+                            <h2>🔗 Liens professionnels</h2>
+                            <div className={styles.socialLinksGrid}>
+                                {freelance.socialLinks.linkedin && (
+                                    <a
+                                        href={freelance.socialLinks.linkedin}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className={styles.socialLinkCard}
+                                    >
+                                        <span className={styles.socialIcon}>💼</span>
+                                        <span>LinkedIn</span>
+                                    </a>
+                                )}
+                                {freelance.socialLinks.github && (
+                                    <a
+                                        href={freelance.socialLinks.github}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className={styles.socialLinkCard}
+                                    >
+                                        <span className={styles.socialIcon}>👨‍💻</span>
+                                        <span>GitHub</span>
+                                    </a>
+                                )}
+                                {freelance.socialLinks.portfolio && (
+                                    <a
+                                        href={freelance.socialLinks.portfolio}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className={styles.socialLinkCard}
+                                    >
+                                        <span className={styles.socialIcon}>🌐</span>
+                                        <span>Portfolio</span>
+                                    </a>
+                                )}
+                                {freelance.socialLinks.twitter && (
+                                    <a
+                                        href={freelance.socialLinks.twitter}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className={styles.socialLinkCard}
+                                    >
+                                        <span className={styles.socialIcon}>🐦</span>
+                                        <span>Twitter</span>
+                                    </a>
+                                )}
+                                {freelance.socialLinks.other && (
+                                    <a
+                                        href={freelance.socialLinks.other}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className={styles.socialLinkCard}
+                                    >
+                                        <span className={styles.socialIcon}>🔗</span>
+                                        <span>Autre lien</span>
+                                    </a>
+                                )}
+                            </div>
+                        </section>
+                    )}
+
+                    {/* Reviews */
+                        <section className={styles.section}>
+                            <h2>Évaluations ({reviewStats?.totalReviews || 0})</h2>
+
+                            {reviewStats && reviewStats.totalReviews > 0 ? (
+                                <>
+                                    <div className={styles.reviewsStats}>
+                                        <div className={styles.averageRating}>
+                                            <div className={styles.ratingNumber}>{reviewStats.averageRating}</div>
+                                            <div className={styles.stars}>
+                                                {[1, 2, 3, 4, 5].map((star) => (
+                                                    <span key={star} className={star <= Math.round(reviewStats.averageRating) ? styles.starFilled : styles.starEmpty}>
+                                                        ⭐
+                                                    </span>
+                                                ))}
+                                            </div>
+                                            <div className={styles.reviewCount}>
+                                                Basé sur {reviewStats.totalReviews} avis
+                                            </div>
                                         </div>
-                                        <div className={styles.reviewCount}>
-                                            Basé sur {reviewStats.totalReviews} avis
+
+                                        <div className={styles.ratingBars}>
+                                            {[5, 4, 3, 2, 1].map((rating) => (
+                                                <div key={rating} className={styles.ratingBar}>
+                                                    <span>{rating}★</span>
+                                                    <div className={styles.barContainer}>
+                                                        <div
+                                                            className={styles.barFill}
+                                                            style={{
+                                                                width: `${reviewStats.totalReviews > 0 ? (reviewStats.ratingDistribution[rating] / reviewStats.totalReviews) * 100 : 0}%`
+                                                            }}
+                                                        ></div>
+                                                    </div>
+                                                    <span className={styles.barCount}>{reviewStats.ratingDistribution[rating]}</span>
+                                                </div>
+                                            ))}
                                         </div>
                                     </div>
 
-                                    <div className={styles.ratingBars}>
-                                        {[5, 4, 3, 2, 1].map((rating) => (
-                                            <div key={rating} className={styles.ratingBar}>
-                                                <span>{rating}★</span>
-                                                <div className={styles.barContainer}>
-                                                    <div
-                                                        className={styles.barFill}
-                                                        style={{
-                                                            width: `${reviewStats.totalReviews > 0 ? (reviewStats.ratingDistribution[rating] / reviewStats.totalReviews) * 100 : 0}%`
-                                                        }}
-                                                    ></div>
+                                    <div className={styles.reviewsList}>
+                                        {reviews.map((review) => (
+                                            <div key={review._id} className={styles.reviewCard}>
+                                                <div className={styles.reviewHeader}>
+                                                    <div>
+                                                        <h4>{review.company.name}</h4>
+                                                        <p className={styles.reviewProject}>{review.project.title}</p>
+                                                    </div>
+                                                    <div className={styles.reviewRating}>
+                                                        {[1, 2, 3, 4, 5].map((star) => (
+                                                            <span key={star} className={star <= review.rating ? styles.starFilled : styles.starEmpty}>
+                                                                ⭐
+                                                            </span>
+                                                        ))}
+                                                    </div>
                                                 </div>
-                                                <span className={styles.barCount}>{reviewStats.ratingDistribution[rating]}</span>
+                                                <p className={styles.reviewComment}>{review.comment}</p>
+                                                <div className={styles.reviewDate}>
+                                                    {new Date(review.createdAt).toLocaleDateString('fr-FR', {
+                                                        day: 'numeric',
+                                                        month: 'long',
+                                                        year: 'numeric',
+                                                    })}
+                                                </div>
                                             </div>
                                         ))}
                                     </div>
+                                </>
+                            ) : (
+                                <div className={styles.noReviews}>
+                                    <p>Aucune évaluation pour le moment</p>
                                 </div>
-
-                                <div className={styles.reviewsList}>
-                                    {reviews.map((review) => (
-                                        <div key={review._id} className={styles.reviewCard}>
-                                            <div className={styles.reviewHeader}>
-                                                <div>
-                                                    <h4>{review.company.name}</h4>
-                                                    <p className={styles.reviewProject}>{review.project.title}</p>
-                                                </div>
-                                                <div className={styles.reviewRating}>
-                                                    {[1, 2, 3, 4, 5].map((star) => (
-                                                        <span key={star} className={star <= review.rating ? styles.starFilled : styles.starEmpty}>
-                                                            ⭐
-                                                        </span>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                            <p className={styles.reviewComment}>{review.comment}</p>
-                                            <div className={styles.reviewDate}>
-                                                {new Date(review.createdAt).toLocaleDateString('fr-FR', {
-                                                    day: 'numeric',
-                                                    month: 'long',
-                                                    year: 'numeric',
-                                                })}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </>
-                        ) : (
-                            <div className={styles.noReviews}>
-                                <p>Aucune évaluation pour le moment</p>
-                            </div>
-                        )}
-                    </section>
+                            )}
+                        </section>
                 </div>
             </div>
 
