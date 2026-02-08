@@ -66,10 +66,43 @@ function LoginContent() {
                 // Succès !
                 addToast('🎉 Connexion réussie ! Bienvenue !', 'success');
 
-                // Rediriger vers le dashboard ou la page d'accueil
-                const callbackUrl = searchParams.get('callbackUrl') || '/';
+                // Fetch session to get user role
+                const sessionRes = await fetch('/api/auth/session');
+                const session = await sessionRes.json();
+
+                // Smart redirect based on user role
+                let redirectUrl = '/';
+
+                if (session?.user?.role === 'freelance') {
+                    // Check if engineer has completed profile
+                    try {
+                        const profileRes = await fetch('/api/profile/freelance');
+                        const profileData = await profileRes.json();
+
+                        if (profileRes.ok && profileData.profile) {
+                            // Profile exists, go to dashboard
+                            redirectUrl = '/dashboard';
+                        } else {
+                            // No profile yet, go to setup
+                            redirectUrl = '/profile/setup';
+                        }
+                    } catch (error) {
+                        // If error checking profile, default to dashboard
+                        redirectUrl = '/dashboard';
+                    }
+                } else if (session?.user?.role === 'company') {
+                    // Companies go to homepage to find engineers
+                    redirectUrl = '/';
+                } else {
+                    // Default fallback
+                    redirectUrl = '/';
+                }
+
+                // Use callbackUrl if provided, otherwise use role-based redirect
+                const finalUrl = searchParams.get('callbackUrl') || redirectUrl;
+
                 setTimeout(() => {
-                    router.push(callbackUrl);
+                    router.push(finalUrl);
                     router.refresh();
                 }, 1000);
             }

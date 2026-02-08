@@ -20,19 +20,35 @@ export default function Navbar() {
                     </div>
 
                     <div className="flex items-center gap-md">
-                        <Link href="/categories" className={styles.navLink}>
-                            Catégories
-                        </Link>
-                        <Link href="/freelances/search" className={styles.navLink}>
-                            Trouver un ingénieur
-                        </Link>
-
                         {!isLoading && (
                             <>
-                                {session ? (
+                                {!session ? (
+                                    // Visiteur non connecté
+                                    <>
+                                        <Link href="/categories" className={styles.navLink}>
+                                            Catégories
+                                        </Link>
+                                        <Link href="/freelances/search" className={styles.navLink}>
+                                            Trouver un ingénieur
+                                        </Link>
+                                        <Link href="/auth/login" className={styles.navLink}>
+                                            Connexion
+                                        </Link>
+                                        <Link href="/auth/register/freelance" className="btn btn-primary btn-sm">
+                                            Je suis ingénieur
+                                        </Link>
+                                    </>
+                                ) : session.user.role === 'freelance' ? (
+                                    // Ingénieur connecté
                                     <>
                                         <Link href="/dashboard" className={styles.navLink}>
-                                            Tableau de bord
+                                            📊 Dashboard
+                                        </Link>
+                                        <Link href="/profile/view" className={styles.navLink}>
+                                            👤 Mon profil
+                                        </Link>
+                                        <Link href="/profile/edit" className={styles.navLink}>
+                                            ✏️ Modifier
                                         </Link>
                                         <div className={styles.userMenu}>
                                             <span className={styles.userName}>
@@ -50,13 +66,28 @@ export default function Navbar() {
                                         </div>
                                     </>
                                 ) : (
+                                    // Entreprise connectée (ou autre rôle)
                                     <>
-                                        <Link href="/auth/login" className={styles.navLink}>
-                                            Connexion
+                                        <Link href="/categories" className={styles.navLink}>
+                                            Catégories
                                         </Link>
-                                        <Link href="/auth/register" className="btn btn-primary btn-sm">
-                                            Créer mon compte
+                                        <Link href="/freelances/search" className={styles.navLink}>
+                                            Trouver un ingénieur
                                         </Link>
+                                        <div className={styles.userMenu}>
+                                            <span className={styles.userName}>
+                                                👋 {session.user.firstName}
+                                            </span>
+                                            <button
+                                                onClick={async () => {
+                                                    await fetch('/api/auth/logout', { method: 'POST' });
+                                                    signOut({ callbackUrl: '/' });
+                                                }}
+                                                className="btn btn-outline btn-sm"
+                                            >
+                                                Déconnexion
+                                            </button>
+                                        </div>
                                     </>
                                 )}
                             </>
