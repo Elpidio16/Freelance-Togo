@@ -42,6 +42,7 @@ export async function POST(request) {
         const {
             title,
             bio,
+            category,
             skills,
             hourlyRate,
             dailyRate,
@@ -54,9 +55,9 @@ export async function POST(request) {
         } = body;
 
         // Validation stricte
-        if (!title || !bio) {
+        if (!title || !bio || !category) {
             return NextResponse.json(
-                { error: 'Titre et bio requis' },
+                { error: 'Titre, bio et catégorie requis' },
                 { status: 400 }
             );
         }
@@ -85,6 +86,7 @@ export async function POST(request) {
                 userId: user.id,
                 title,
                 bio,
+                category,
                 skills: skills || [],
                 hourlyRate: parseFloat(hourlyRate) || 0,
                 dailyRate: parseFloat(dailyRate) || 0,
