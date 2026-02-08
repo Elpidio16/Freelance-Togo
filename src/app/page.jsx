@@ -128,6 +128,7 @@ export default function Home() {
                         </div>
                     </div>
                 </section>
+            )}
 
             {/* Categories Section */}
             <section className={styles.categoriesSection}>
