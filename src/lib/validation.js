@@ -115,8 +115,8 @@ export const validatePassword = (password) => {
         return { valid: false, error: 'Le mot de passe est requis' };
     }
 
-    if (password.length < 8) {
-        return { valid: false, error: 'Minimum 8 caractères requis' };
+    if (password.length < 12) {
+        return { valid: false, error: 'Minimum 12 caractères requis' };
     }
 
     if (password.length > 128) {
@@ -320,8 +320,8 @@ export const getPasswordStrength = (password) => {
     let score = 0;
 
     // Longueur
-    if (password.length >= 8) score++;
-    if (password.length >= 12) score++;
+    if (password.length >= 8) score++; // Minimum vital
+    if (password.length >= 12) score++; // Recommandé
 
     // Complexité
     if (/[a-z]/.test(password)) score++;
@@ -329,8 +329,9 @@ export const getPasswordStrength = (password) => {
     if (/\d/.test(password)) score++;
     if (/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) score++;
 
-    if (score <= 2) return { score, label: 'Faible', color: '#ef4444' };
-    if (score <= 4) return { score, label: 'Moyen', color: '#f59e0b' };
+    // Score max = 6
+    if (score < 4) return { score, label: 'Faible', color: '#ef4444' };
+    if (score < 6) return { score, label: 'Moyen', color: '#f59e0b' };
     return { score, label: 'Fort', color: '#10b981' };
 };
 

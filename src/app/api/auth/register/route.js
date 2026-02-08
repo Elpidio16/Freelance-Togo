@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { validatePassword } from '@/lib/validation';
 import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
 import { sendVerificationEmail } from '@/lib/email';
@@ -37,6 +38,15 @@ export async function POST(request) {
         if (existingUser) {
             return NextResponse.json(
                 { error: 'Un compte avec cet email existe déjà' },
+                { status: 400 }
+            );
+        }
+
+        // Valider la complexité du mot de passe (Server-side)
+        const passwordValidation = validatePassword(password);
+        if (!passwordValidation.valid) {
+            return NextResponse.json(
+                { error: passwordValidation.error },
                 { status: 400 }
             );
         }
