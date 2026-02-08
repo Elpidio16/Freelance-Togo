@@ -218,3 +218,44 @@ export async function PUT(request) {
         );
     }
 }
+
+export async function DELETE(request) {
+    try {
+        const session = await getServerSession(authOptions);
+
+        if (!session || !session.user) {
+            return NextResponse.json(
+                { error: 'Non authentifié' },
+                { status: 401 }
+            );
+        }
+
+        const user = await prisma.user.findUnique({
+            where: { email: session.user.email }
+        });
+
+        if (!user) {
+            return NextResponse.json(
+                { error: 'Utilisateur non trouvé' },
+                { status: 404 }
+            );
+        }
+
+        // Supprimer le profil freelance
+        await prisma.freelanceProfile.delete({
+            where: { userId: user.id }
+        });
+
+        return NextResponse.json(
+            { message: 'Profil supprimé avec succès' },
+            { status: 200 }
+        );
+
+    } catch (error) {
+        console.error('Erreur lors de la suppression du profil:', error);
+        return NextResponse.json(
+            { error: 'Une erreur est survenue' },
+            { status: 500 }
+        );
+    }
+}

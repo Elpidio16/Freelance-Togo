@@ -1,0 +1,318 @@
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--spacing-xl) var(--spacing-md);
+}
+
+.loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    gap: var(--spacing-md);
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid var(--color-border);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-xl);
+    padding: var(--spacing-lg);
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    border-radius: var(--border-radius-lg);
+    color: white;
+}
+
+.headerContent {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+}
+
+.avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.headerInfo h1 {
+    margin: 0 0 var(--spacing-xs) 0;
+    font-size: 2rem;
+}
+
+.title {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    margin: var(--spacing-xs) 0;
+}
+
+.category {
+    display: inline-block;
+    padding: var(--spacing-xs) var(--spacing-md);
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: var(--border-radius-full);
+    font-size: 0.9rem;
+    margin-top: var(--spacing-sm);
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.card {
+    background: white;
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-md);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.card h2 {
+    margin: 0 0 var(--spacing-md) 0;
+    font-size: 1.3rem;
+    color: var(--color-text);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.bio {
+    line-height: 1.6;
+    color: var(--color-text-light);
+}
+
+.availability {
+    margin-top: var(--spacing-md);
+}
+
+.badge {
+    display: inline-block;
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: var(--border-radius-full);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.badge.disponible {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.badge.occupé {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.badge.bientôt {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.rates {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.rate {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-md);
+    background: var(--color-background);
+    border-radius: var(--border-radius-md);
+}
+
+.rateLabel {
+    color: var(--color-text-light);
+}
+
+.rateValue {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--color-primary);
+}
+
+.skills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+}
+
+.skill {
+    padding: var(--spacing-xs) var(--spacing-md);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: var(--border-radius-full);
+    font-size: 0.9rem;
+}
+
+.certifications,
+.experiences,
+.education,
+.languages {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.certification,
+.experience,
+.educationItem {
+    padding: var(--spacing-md);
+    background: var(--color-background);
+    border-radius: var(--border-radius-md);
+    border-left: 4px solid var(--color-primary);
+}
+
+.certification h3,
+.experience h3,
+.educationItem h3 {
+    margin: 0 0 var(--spacing-xs) 0;
+    color: var(--color-text);
+}
+
+.certIssuer,
+.certDate,
+.expCompany,
+.expDuration,
+.eduSchool,
+.eduField,
+.eduYear {
+    font-size: 0.9rem;
+    color: var(--color-text-light);
+    margin: var(--spacing-xs) 0;
+}
+
+.certLink {
+    display: inline-block;
+    margin-top: var(--spacing-sm);
+    color: var(--color-primary);
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.certLink:hover {
+    text-decoration: underline;
+}
+
+.expDesc {
+    margin-top: var(--spacing-sm);
+    line-height: 1.5;
+}
+
+.language {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--color-background);
+    border-radius: var(--border-radius-md);
+}
+
+.langName {
+    font-weight: 500;
+}
+
+.langLevel {
+    font-size: 0.9rem;
+    color: var(--color-text-light);
+}
+
+.socialLinks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+}
+
+.socialLink {
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--color-primary);
+    color: white;
+    text-decoration: none;
+    border-radius: var(--border-radius-md);
+    font-size: 0.9rem;
+    transition: background 0.3s ease;
+}
+
+.socialLink:hover {
+    background: var(--color-primary-dark);
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-md);
+}
+
+.stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: var(--spacing-md);
+    background: var(--color-background);
+    border-radius: var(--border-radius-md);
+}
+
+.statValue {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--color-primary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.statLabel {
+    font-size: 0.85rem;
+    color: var(--color-text-light);
+}
+
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        gap: var(--spacing-md);
+        text-align: center;
+    }
+
+    .headerContent {
+        flex-direction: column;
+    }
+
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stats {
+        grid-template-columns: 1fr;
+    }
+}
