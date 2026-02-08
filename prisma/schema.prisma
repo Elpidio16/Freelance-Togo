@@ -33,6 +33,7 @@ model User {
   loginAttempts Int       @default(0)
   lockUntil     DateTime?
   lastLogin     DateTime?
+  lastLogout    DateTime? // Pour invalider les sessions JWT précédentes
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 

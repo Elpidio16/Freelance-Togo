@@ -107,13 +107,25 @@ export const authOptions = {
                         lastName: true,
                         role: true,
                         isVerified: true,
-                        password: true // We need this to invalidate if password changed (optional but good)
+                        role: true,
+                        isVerified: true,
+                        lastLogout: true // We need this to invalidate if password changed (optional but good)
                     }
                 });
 
                 // If user deleted or blocked, invalidate token
                 if (!dbUser) {
                     return null;
+                }
+
+                // CHECK: If user logged out after token was issued
+                // token.iat is in seconds, lastLogout is Date object
+                if (dbUser.lastLogout) {
+                    const lastLogoutTime = Math.floor(dbUser.lastLogout.getTime() / 1000);
+                    // Add small buffer (e.g. 2 seconds) to avoid sync issues
+                    if (lastLogoutTime > (token.iat || 0)) {
+                        return null; // Token is from an old session
+                    }
                 }
 
                 // Sync latest data (e.g. if role changed)

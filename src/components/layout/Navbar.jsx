@@ -39,7 +39,10 @@ export default function Navbar() {
                                                 👋 {session.user.firstName}
                                             </span>
                                             <button
-                                                onClick={() => signOut({ callbackUrl: '/' })}
+                                                onClick={async () => {
+                                                    await fetch('/api/auth/logout', { method: 'POST' });
+                                                    signOut({ callbackUrl: '/' });
+                                                }}
                                                 className="btn btn-outline btn-sm"
                                             >
                                                 Déconnexion
