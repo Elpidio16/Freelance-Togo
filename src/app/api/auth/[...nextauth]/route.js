@@ -5,6 +5,9 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import prisma from "@/lib/prisma";
 import bcrypt from 'bcryptjs';
 
+console.log("🔍 AUTH DEBUG: NEXTAUTH_SECRET is defined:", !!process.env.NEXTAUTH_SECRET);
+console.log("🔍 AUTH DEBUG: NODE_ENV:", process.env.NODE_ENV);
+
 export const authOptions = {
     adapter: PrismaAdapter(prisma),
     providers: [
