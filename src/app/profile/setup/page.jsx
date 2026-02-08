@@ -336,7 +336,7 @@ export default function ProfileSetupPage() {
         <div className={styles.page}>
             <div className={styles.container}>
                 <div className={styles.header}>
-                    <h1>Créez votre profil de freelance</h1>
+                    <h1>Créez votre profil d'ingénieur</h1>
                     <p>Complétez votre profil pour être visible par les entreprises</p>
                     <div className={styles.progress}>
                         <div className={styles.progressBar} style={{ width: `${(step / 7) * 100}%` }}></div>

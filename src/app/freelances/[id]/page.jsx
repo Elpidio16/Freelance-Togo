@@ -67,7 +67,7 @@ export default function FreelanceProfilePage() {
         return (
             <div className={styles.page}>
                 <div className={styles.container}>
-                    <h1>Freelance non trouvé</h1>
+                    <h1>Ingénieur non trouvé</h1>
                     <Link href="/freelances/search" className="btn btn-primary">
                         Retour à la recherche
                     </Link>

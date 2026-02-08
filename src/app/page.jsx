@@ -158,7 +158,7 @@ export default function Home() {
                         <p>Inscrivez-vous dès maintenant et commencez à trouver des opportunités</p>
                         <div className="flex gap-md items-center justify-center mt-4">
                             <Link href="/auth/register/freelance" className="btn btn-primary btn-lg">
-                                Je suis freelance
+                                Je suis ingénieur
                             </Link>
                         </div>
                     </div>
