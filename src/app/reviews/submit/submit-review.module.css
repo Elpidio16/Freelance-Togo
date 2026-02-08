@@ -113,7 +113,8 @@
 }
 
 /* Comment */
-textarea {
+/* Comment */
+.textarea {
     width: 100%;
     padding: 1rem;
     border: 2px solid var(--color-border);
@@ -124,7 +125,7 @@ textarea {
     transition: border-color 0.2s ease;
 }
 
-textarea:focus {
+.textarea:focus {
     outline: none;
     border-color: var(--color-primary);
 }

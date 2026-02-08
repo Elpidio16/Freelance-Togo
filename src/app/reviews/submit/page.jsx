@@ -175,6 +175,7 @@ export default function SubmitReviewPage() {
                     <div className={styles.section}>
                         <label className={styles.label}>Votre commentaire * (minimum 20 caractères)</label>
                         <textarea
+                            className={styles.textarea}
                             value={formData.comment}
                             onChange={(e) => setFormData({ ...formData, comment: e.target.value })}
                             placeholder="Partagez votre expérience avec ce freelance..."
