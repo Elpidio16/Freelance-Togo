@@ -15,7 +15,8 @@ import {
     validatePassword,
     validatePasswordConfirmation,
     validateCity,
-    getPasswordStrength
+    getPasswordStrength,
+    CITIES
 } from '@/lib/validation';
 import styles from './freelance.module.css';
 
@@ -202,15 +203,29 @@ export default function RegisterFreelancePage() {
 
                         <div className={styles.formGroup}>
                             <label>Localisation</label>
-                            <Input
-                                label="Ville au Togo"
-                                name="city"
-                                value={formData.city}
-                                onChange={handleChange}
-                                error={errors.city}
-                                placeholder="Lomé, Kara, Sokodé..."
-                                required
-                            />
+                            <div className="form-group">
+                                <label className="label">
+                                    Ville au Togo
+                                    <span style={{ color: 'var(--accent-color)' }}> *</span>
+                                </label>
+                                <select
+                                    name="city"
+                                    value={formData.city}
+                                    onChange={handleChange}
+                                    className={`select ${errors.city ? 'input-error' : ''}`}
+                                    required
+                                >
+                                    <option value="">Sélectionnez une ville</option>
+                                    {CITIES.sort().map((city) => (
+                                        <option key={city} value={city}>
+                                            {city}
+                                        </option>
+                                    ))}
+                                </select>
+                                {errors.city && (
+                                    <span className="text-sm" style={{ color: '#ef4444', marginTop: '0.25rem', display: 'block' }}>{errors.city}</span>
+                                )}
+                            </div>
                         </div>
 
                         <div className={styles.formGroup}>

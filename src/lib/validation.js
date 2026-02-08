@@ -246,20 +246,20 @@ export const validateSkills = (skillsString) => {
     return { valid: true, value: skills };
 };
 
+export const CITIES = [
+    'Lomé', 'Kara', 'Sokodé', 'Atakpamé', 'Kpalimé', 'Dapaong', 'Tsévié', 'Aného',
+    'Bassar', 'Tabligbo', 'Niamtougou', 'Bafilo', 'Kandé', 'Vogan', 'Badou',
+    'Mango', 'Pagouda', 'Sotouboua', 'Blitta', 'Tandjouaré', 'Cinkassé',
+    'Agou', 'Elavagnon', 'Tohoun', 'Assahoun', 'Kévé'
+];
+
 // Validation de la ville
 export const validateCity = (city) => {
-    const validCities = [
-        'Lomé', 'Kara', 'Sokodé', 'Atakpamé', 'Kpalimé', 'Dapaong', 'Tsévié', 'Aného',
-        'Bassar', 'Tabligbo', 'Niamtougou', 'Bafilo', 'Kandé', 'Vogan', 'Badou',
-        'Mango', 'Pagouda', 'Sotouboua', 'Blitta', 'Tandjouaré', 'Cinkassé',
-        'Pagouda', 'Kévé', 'Agou', 'Elavagnon', 'Tohoun', 'Assahoun'
-    ];
-
     if (!city || city === '') {
         return { valid: false, error: 'Veuillez sélectionner une ville' };
     }
 
-    if (!validCities.includes(city)) {
+    if (!CITIES.includes(city)) {
         return { valid: false, error: 'Ville non valide' };
     }
 
