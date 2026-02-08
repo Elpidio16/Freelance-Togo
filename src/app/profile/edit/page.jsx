@@ -349,7 +349,7 @@ export default function ProfileEditPage() {
                         onChange={handleChange}
                         placeholder="Ex: Développeur Full Stack"
                     />
-                    <div className="form-group">
+                    <div className={styles.formGroup}>
                         <label>Bio *</label>
                         <textarea
                             name="bio"
@@ -359,7 +359,7 @@ export default function ProfileEditPage() {
                             placeholder="Présentez-vous en quelques lignes..."
                         />
                     </div>
-                    <div className="form-group">
+                    <div className={styles.formGroup}>
                         <label>Catégorie *</label>
                         <select name="category" value={formData.category} onChange={handleChange}>
                             <option value="">Sélectionnez une catégorie</option>
@@ -372,7 +372,7 @@ export default function ProfileEditPage() {
                             <option value="Autre">Autre</option>
                         </select>
                     </div>
-                    <div className="form-group">
+                    <div className={styles.formGroup}>
                         <label>Disponibilité</label>
                         <select name="availability" value={formData.availability} onChange={handleChange}>
                             <option value="disponible">Disponible</option>
@@ -441,7 +441,7 @@ export default function ProfileEditPage() {
                             value={currentCertification.name}
                             onChange={(e) => setCurrentCertification(prev => ({ ...prev, name: e.target.value }))}
                         />
-                        <div className="form-group">
+                        <div className={styles.formGroup}>
                             <label>Organisme émetteur</label>
                             <select
                                 value={currentCertification.issuer}
@@ -512,7 +512,7 @@ export default function ProfileEditPage() {
                             onChange={(e) => setCurrentExperience(prev => ({ ...prev, duration: e.target.value }))}
                             placeholder="Ex: 2020-2023"
                         />
-                        <div className="form-group">
+                        <div className={styles.formGroup}>
                             <label>Description</label>
                             <textarea
                                 value={currentExperience.description}
@@ -599,7 +599,7 @@ export default function ProfileEditPage() {
                             value={currentLanguage.name}
                             onChange={(e) => setCurrentLanguage(prev => ({ ...prev, name: e.target.value }))}
                         />
-                        <div className="form-group">
+                        <div className={styles.formGroup}>
                             <label>Niveau</label>
                             <select
                                 value={currentLanguage.level}
