@@ -85,7 +85,7 @@ export default function ProfileEditPage() {
         try {
             const res = await fetch('/api/profile/freelance');
             if (res.status === 404) {
-                addToast('Vous n\\'avez pas encore créé de profil', 'info');
+                addToast('Vous n\'avez pas encore créé de profil', 'info');
                 router.push('/profile/setup');
                 return;
             }
@@ -183,7 +183,7 @@ export default function ProfileEditPage() {
     // Experiences
     const addExperience = () => {
         if (!currentExperience.company || !currentExperience.role) {
-            addToast('Veuillez remplir au moins l\\'entreprise et le poste', 'error');
+            addToast('Veuillez remplir au moins l\'entreprise et le poste', 'error');
             return;
         }
         setFormData(prev => ({
@@ -205,7 +205,7 @@ export default function ProfileEditPage() {
     // Education
     const addEducation = () => {
         if (!currentEducation.school || !currentEducation.degree) {
-            addToast('Veuillez remplir au moins l\\'école et le diplôme', 'error');
+            addToast('Veuillez remplir au moins l\'école et le diplôme', 'error');
             return;
         }
         setFormData(prev => ({
