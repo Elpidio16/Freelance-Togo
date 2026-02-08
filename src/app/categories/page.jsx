@@ -5,7 +5,7 @@ import { CATEGORIES } from '@/lib/categories';
 
 export const metadata = {
     title: 'Catégories - IngeniHub',
-    description: 'Découvrez toutes les catégories de services freelances disponibles au Togo',
+    description: 'Découvrez toutes les catégories de services d\'ingénieurs disponibles au Togo',
 };
 
 async function getCategoryStats() {
@@ -44,7 +44,7 @@ export default async function CategoriesPage() {
             <div className={styles.container}>
                 <div className={styles.header}>
                     <h1>Toutes les catégories</h1>
-                    <p>Trouvez le freelance parfait pour votre projet</p>
+                    <p>Trouvez l'ingénieur parfait pour votre projet</p>
                 </div>
 
                 <div className={styles.grid}>
@@ -61,7 +61,7 @@ export default async function CategoriesPage() {
                             </p>
                             <div className={styles.cardFooter}>
                                 <span className={styles.count}>
-                                    {category.count} freelances disponibles
+                                    {category.count} ingénieurs disponibles
                                 </span>
                                 <span className={styles.arrow}>→</span>
                             </div>

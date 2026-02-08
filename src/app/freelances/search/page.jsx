@@ -12,7 +12,7 @@ const cities = [
 ];
 
 export default function FreelanceSearchPage() {
-    const [freelances, setFreelances] = useState([]);
+    const [engineers, setEngineers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('');
@@ -21,12 +21,12 @@ export default function FreelanceSearchPage() {
     const [minRate, setMinRate] = useState('');
     const [maxRate, setMaxRate] = useState('');
 
-    // Charger les freelances depuis l'API
+    // Charger les ingénieurs depuis l'API
     useEffect(() => {
-        fetchFreelances();
+        fetchEngineers();
     }, [searchQuery, selectedCategory, selectedCity, selectedAvailability, minRate, maxRate]);
 
-    const fetchFreelances = async () => {
+    const fetchEngineers = async () => {
         setLoading(true);
         try {
             // Construire les query params
@@ -42,14 +42,14 @@ export default function FreelanceSearchPage() {
             const data = await res.json();
 
             if (res.ok) {
-                setFreelances(data.freelances || []);
+                setEngineers(data.freelances || []);
             } else {
                 console.error('Erreur:', data.error);
-                setFreelances([]);
+                setEngineers([]);
             }
         } catch (error) {
-            console.error('Erreur lors du chargement des freelances:', error);
-            setFreelances([]);
+            console.error('Erreur lors du chargement des ingénieurs:', error);
+            setEngineers([]);
         } finally {
             setLoading(false);
         }
@@ -69,7 +69,7 @@ export default function FreelanceSearchPage() {
             <div className={styles.container}>
                 {/* Header */}
                 <div className={styles.header}>
-                    <h1>Trouver un freelance</h1>
+                    <h1>Trouver un ingénieur</h1>
                     <p>Découvrez les meilleurs talents du Togo</p>
                 </div>
 
@@ -149,7 +149,7 @@ export default function FreelanceSearchPage() {
                 {/* Results */}
                 <div className={styles.results}>
                     <div className={styles.resultsHeader}>
-                        <p>{freelances.length} freelance{freelances.length > 1 ? 's' : ''} trouvé{freelances.length > 1 ? 's' : ''}</p>
+                        <p>{engineers.length} ingénieur{engineers.length > 1 ? 's' : ''} trouvé{engineers.length > 1 ? 's' : ''}</p>
                     </div>
 
                     {loading ? (
@@ -159,63 +159,63 @@ export default function FreelanceSearchPage() {
                     ) : (
                         <>
                             <div className={styles.grid}>
-                                {freelances.map((freelance) => (
+                                {engineers.map((engineer) => (
                                     <Link
-                                        key={freelance.id}
-                                        href={`/freelances/${freelance.id}`}
+                                        key={engineer.id}
+                                        href={`/freelances/${engineer.id}`}
                                         className={styles.card}
                                     >
                                         <div className={styles.cardHeader}>
                                             <div className={styles.avatar}>
-                                                {freelance.image ? (
-                                                    <img src={freelance.image} alt={freelance.name} />
+                                                {engineer.image ? (
+                                                    <img src={engineer.image} alt={engineer.name} />
                                                 ) : (
                                                     <div className={styles.avatarPlaceholder}>
-                                                        {freelance.name.charAt(0)}
+                                                        {engineer.name.charAt(0)}
                                                     </div>
                                                 )}
                                             </div>
                                             <div className={styles.cardInfo}>
-                                                <h3>{freelance.name}</h3>
-                                                <p className={styles.title}>{freelance.title}</p>
+                                                <h3>{engineer.name}</h3>
+                                                <p className={styles.title}>{engineer.title}</p>
                                             </div>
                                         </div>
 
                                         <div className={styles.rating}>
-                                            <span className={styles.stars}>⭐ {freelance.rating}</span>
-                                            <span className={styles.reviews}>({freelance.reviews} avis)</span>
+                                            <span className={styles.stars}>⭐ {engineer.rating}</span>
+                                            <span className={styles.reviews}>({engineer.reviews} avis)</span>
                                         </div>
 
                                         <div className={styles.skills}>
-                                            {freelance.skills.slice(0, 3).map((skill, idx) => (
+                                            {engineer.skills.slice(0, 3).map((skill, idx) => (
                                                 <span key={idx} className={styles.skill}>{skill}</span>
                                             ))}
-                                            {freelance.skills.length > 3 && (
-                                                <span className={styles.skillMore}>+{freelance.skills.length - 3}</span>
+                                            {engineer.skills.length > 3 && (
+                                                <span className={styles.skillMore}>+{engineer.skills.length - 3}</span>
                                             )}
                                         </div>
 
                                         <div className={styles.cardFooter}>
                                             <div className={styles.location}>
-                                                📍 {freelance.city}
+                                                📍 {engineer.city}
                                             </div>
                                             <div className={styles.rate}>
-                                                {freelance.hourlyRate.toLocaleString()} FCFA/h
+                                                {engineer.hourlyRate.toLocaleString()} FCFA/h
                                             </div>
                                         </div>
 
                                         <div className={styles.availability}>
-                                            <span className={`${styles.badge} ${styles[freelance.availability.replace(' ', '-')]}`}>
-                                                {freelance.availability}
+                                            <span className={`${styles.badge} ${styles[engineer.availability.replace(' ', '-')]}`}>
+                                                {engineer.availability}
                                             </span>
                                         </div>
                                     </Link>
                                 ))}
                             </div>
 
-                            {freelances.length === 0 && !loading && (
+                            {engineers.length === 0 && !loading && (
                                 <div className={styles.noResults}>
-                                    <p>Aucun freelance trouvé avec ces critères</p>
+                                    <p>Aucun ingénieur trouvé avec ces critères</p>
                                     <button onClick={resetFilters} className="btn btn-primary">
                                         Réinitialiser les filtres
                                     </button>

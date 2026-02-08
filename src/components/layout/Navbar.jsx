@@ -24,7 +24,7 @@ export default function Navbar() {
                             Catégories
                         </Link>
                         <Link href="/freelances/search" className={styles.navLink}>
-                            Trouver un freelance
+                            Trouver un ingénieur
                         </Link>
 
                         {!isLoading && (
