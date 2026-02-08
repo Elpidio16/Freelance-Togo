@@ -3,7 +3,8 @@ import prisma from '@/lib/prisma';
 
 export async function GET(request, { params }) {
     try {
-        const { id } = params;
+        // Next.js 15: params is a Promise, must await it
+        const { id } = await params;
         console.log('[API] Fetching profile for ID:', id);
 
         // Récupérer le profil avec les données utilisateur
