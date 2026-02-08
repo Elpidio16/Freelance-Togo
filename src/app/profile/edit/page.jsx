@@ -12,6 +12,7 @@ import {
     validateCertificationUrl,
     CERTIFICATION_ISSUERS
 } from '@/lib/validation';
+import { CATEGORIES } from '@/lib/categories';
 import styles from './profile-edit.module.css';
 
 export default function ProfileEditPage() {
@@ -363,13 +364,9 @@ export default function ProfileEditPage() {
                         <label>Catégorie *</label>
                         <select name="category" value={formData.category} onChange={handleChange}>
                             <option value="">Sélectionnez une catégorie</option>
-                            <option value="Développement Web">Développement Web</option>
-                            <option value="Développement Mobile">Développement Mobile</option>
-                            <option value="Design UI/UX">Design UI/UX</option>
-                            <option value="Data Science">Data Science</option>
-                            <option value="DevOps">DevOps</option>
-                            <option value="Cybersécurité">Cybersécurité</option>
-                            <option value="Autre">Autre</option>
+                            {CATEGORIES.map(cat => (
+                                <option key={cat.id} value={cat.name}>{cat.name}</option>
+                            ))}
                         </select>
                     </div>
                     <div className={styles.formGroup}>

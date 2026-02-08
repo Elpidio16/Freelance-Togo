@@ -12,6 +12,7 @@ import {
     validateCertificationUrl,
     CERTIFICATION_ISSUERS
 } from '@/lib/validation';
+import { CATEGORIES } from '@/lib/categories';
 import styles from './profile-setup.module.css';
 
 export default function ProfileSetupPage() {
@@ -396,12 +397,9 @@ export default function ProfileSetupPage() {
                                     required
                                 >
                                     <option value="">Sélectionnez votre spécialisation</option>
-                                    <option value="Informatique & IT">Informatique & IT</option>
-                                    <option value="Génie Civil">Génie Civil</option>
-                                    <option value="Génie Électrique">Génie Électrique</option>
-                                    <option value="Génie Mécanique">Génie Mécanique</option>
-                                    <option value="Télécommunications">Télécommunications</option>
-                                    <option value="Génie Industriel">Génie Industriel</option>
+                                    {CATEGORIES.map(cat => (
+                                        <option key={cat.id} value={cat.name}>{cat.name}</option>
+                                    ))}
                                 </select>
                             </div>
                             <div className={styles.inputGroup}>
