@@ -127,6 +127,31 @@ export default function Home() {
                     </div>
                 </div>
             </section>
+            )}
+
+            {/* Engineer Welcome Widget - Show only for engineers */}
+            {session && session.user.role === 'freelance' && (
+                <section className={styles.hero}>
+                    <div className="container">
+                        <div className={styles.heroContent}>
+                            <h1 className={styles.heroTitle}>
+                                👋 Bienvenue, <span className={styles.gradient}>{session.user.firstName}</span> !
+                            </h1>
+                            <p className={styles.heroDescription}>
+                                Gérez votre profil et suivez vos opportunités depuis votre dashboard
+                            </p>
+                            <div className="flex gap-md items-center justify-center mt-4">
+                                <Link href="/dashboard" className="btn btn-primary btn-lg">
+                                    📊 Voir mon dashboard
+                                </Link>
+                                <Link href="/profile/edit" className="btn btn-outline btn-lg">
+                                    ✏️ Modifier mon profil
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            )}
 
             {/* Categories Section */}
             <section className={styles.categoriesSection}>
