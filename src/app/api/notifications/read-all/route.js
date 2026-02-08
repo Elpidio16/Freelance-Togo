@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import connectDB from '@/lib/mongodb';
-import Notification from '@/models/Notification';
+import prisma from '@/lib/prisma';
 
 // PUT /api/notifications/read-all - Mark all notifications as read
 export async function PUT(request) {
@@ -13,18 +12,16 @@ export async function PUT(request) {
             return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
         }
 
-        await connectDB();
-
-        await Notification.updateMany(
-            {
+        await prisma.notification.updateMany({
+            where: {
                 userId: session.user.id,
                 read: false,
             },
-            {
+            data: {
                 read: true,
                 readAt: new Date(),
             }
-        );
+        });
 
         return NextResponse.json(
             {

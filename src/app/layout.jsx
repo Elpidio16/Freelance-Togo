@@ -13,7 +13,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
     return (
-        <html lang="fr">
+        <html lang="fr" suppressHydrationWarning>
             <body>
                 <Providers>
                     <ToastProvider>

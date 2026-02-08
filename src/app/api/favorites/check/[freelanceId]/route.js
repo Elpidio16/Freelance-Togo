@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import connectDB from '@/lib/mongodb';
-import Favorite from '@/models/Favorite';
+import prisma from '@/lib/prisma';
 
 // GET /api/favorites/check/[freelanceId] - Check if freelancer is in favorites
 export async function GET(request, { params }) {
@@ -17,18 +16,18 @@ export async function GET(request, { params }) {
             return NextResponse.json({ isFavorite: false }, { status: 200 });
         }
 
-        await connectDB();
-
         const freelanceId = params.freelanceId;
 
-        const favorite = await Favorite.findOne({
-            companyId: session.user.id,
-            freelanceId,
+        const favorite = await prisma.favorite.findFirst({
+            where: {
+                companyId: session.user.id,
+                freelanceId: freelanceId
+            }
         });
 
         return NextResponse.json({
             isFavorite: !!favorite,
-            favoriteId: favorite?._id,
+            favoriteId: favorite?.id,
         }, { status: 200 });
 
     } catch (error) {

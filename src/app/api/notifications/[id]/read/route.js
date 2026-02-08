@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import connectDB from '@/lib/mongodb';
-import Notification from '@/models/Notification';
+import prisma from '@/lib/prisma';
 
 // PUT /api/notifications/[id]/read - Mark notification as read
 export async function PUT(request, { params }) {
@@ -13,12 +12,12 @@ export async function PUT(request, { params }) {
             return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
         }
 
-        await connectDB();
-
         const notificationId = params.id;
 
         // Find and verify ownership
-        const notification = await Notification.findById(notificationId);
+        const notification = await prisma.notification.findUnique({
+            where: { id: notificationId }
+        });
 
         if (!notification) {
             return NextResponse.json(
@@ -27,7 +26,7 @@ export async function PUT(request, { params }) {
             );
         }
 
-        if (notification.userId.toString() !== session.user.id) {
+        if (notification.userId !== session.user.id) {
             return NextResponse.json(
                 { error: 'Accès refusé' },
                 { status: 403 }
@@ -35,14 +34,18 @@ export async function PUT(request, { params }) {
         }
 
         // Mark as read
-        notification.read = true;
-        notification.readAt = new Date();
-        await notification.save();
+        const updatedNotification = await prisma.notification.update({
+            where: { id: notificationId },
+            data: {
+                read: true,
+                readAt: new Date()
+            }
+        });
 
         return NextResponse.json(
             {
                 success: true,
-                notification,
+                notification: updatedNotification,
             },
             { status: 200 }
         );

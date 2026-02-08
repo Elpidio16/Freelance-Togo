@@ -1,12 +1,8 @@
 import { NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
-import FreelanceProfile from '@/models/FreelanceProfile';
-import User from '@/models/User';
+import prisma from '@/lib/prisma';
 
 export async function GET(request) {
     try {
-        await connectDB();
-
         const { searchParams } = new URL(request.url);
         const city = searchParams.get('city');
         const availability = searchParams.get('availability');
@@ -16,66 +12,89 @@ export async function GET(request) {
         const skills = searchParams.get('skills');
         const category = searchParams.get('category');
 
-        // Construire les filtres
-        let filters = {};
+        // Construire les filtres Prisma
+        let where = {};
 
         if (availability) {
-            filters.availability = availability;
+            where.availability = availability;
         }
 
         if (minRate || maxRate) {
-            filters.hourlyRate = {};
-            if (minRate) filters.hourlyRate.$gte = parseInt(minRate);
-            if (maxRate) filters.hourlyRate.$lte = parseInt(maxRate);
+            where.hourlyRate = {};
+            if (minRate) where.hourlyRate.gte = parseFloat(minRate);
+            if (maxRate) where.hourlyRate.lte = parseFloat(maxRate);
         }
 
         if (skills) {
             const skillsArray = skills.split(',').map(s => s.trim());
-            filters.skills = { $in: skillsArray };
+            // hasSome: trouve les profils qui ont au moins une des compétences listées
+            where.skills = { hasSome: skillsArray };
         }
 
         // Filtre par catégorie
         if (category) {
-            filters.category = category;
+            where.category = category;
+        }
+
+        // Filtre par ville (sur la relation user)
+        if (city && city !== 'Toutes les villes') {
+            where.user = {
+                city: city
+            };
+        } else if (city === 'Toutes les villes') {
+            // No filter
         }
 
         // Recherche textuelle sur title, bio, skills
         if (search) {
-            filters.$or = [
-                { title: { $regex: search, $options: 'i' } },
-                { bio: { $regex: search, $options: 'i' } },
-                { skills: { $elemMatch: { $regex: search, $options: 'i' } } },
+            where.OR = [
+                { title: { contains: search, mode: 'insensitive' } },
+                { bio: { contains: search, mode: 'insensitive' } },
+                // Pour les tableaux de strings, 'has' cherche une correspondance exacte d'un élément
+                // Pour une recherche partielle dans les skills, c'est plus complexe avec Prisma.
+                // On se contente de title/bio et exact skill match pour l'instant.
+                { skills: { has: search } }
             ];
         }
 
         // Récupérer les profils avec les données utilisateur
-        const profiles = await FreelanceProfile.find(filters)
-            .populate('userId', 'firstName lastName city email')
-            .sort({ averageRating: -1 })
-            .limit(50);
+        const profiles = await prisma.freelanceProfile.findMany({
+            where: where,
+            include: {
+                user: {
+                    select: {
+                        firstName: true,
+                        lastName: true,
+                        city: true,
+                        email: true,
+                        image: true,
+                    }
+                }
+            },
+            orderBy: {
+                averageRating: 'desc',
+            },
+            take: 50,
+        });
 
-        // Filtrer par ville si spécifié (sur l'utilisateur, pas le profil)
-        let freelances = profiles.map(profile => ({
-            id: profile._id.toString(),
-            name: `${profile.userId.firstName} ${profile.userId.lastName}`,
+        // Formater pour le frontend
+        const freelances = profiles.map(profile => ({
+            id: profile.id,
+            userId: profile.userId,
+            name: `${profile.user.firstName} ${profile.user.lastName}`,
             title: profile.title,
             bio: profile.bio,
             category: profile.category || 'Autre',
-            image: profile.profileImage || null,
+            image: profile.profileImage || profile.user.image || null,
             rating: profile.averageRating || 0,
             reviews: profile.totalReviews || 0,
             hourlyRate: profile.hourlyRate || 0,
             dailyRate: profile.dailyRate || 0,
-            city: profile.userId.city,
+            city: profile.user.city,
             skills: profile.skills || [],
             availability: profile.availability || 'disponible',
             completedProjects: profile.completedProjects || 0,
         }));
-
-        // Filtrer par ville après la récupération
-        if (city && city !== 'Toutes les villes') {
-            freelances = freelances.filter(f => f.city === city);
-        }
 
         return NextResponse.json({ freelances }, { status: 200 });
 

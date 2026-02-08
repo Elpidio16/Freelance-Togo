@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import connectDB from '@/lib/mongodb';
-import Project from '@/models/Project';
+import prisma from '@/lib/prisma';
 
 // GET /api/projects/my-projects - Get company's own projects
 export async function GET(request) {
@@ -20,17 +19,27 @@ export async function GET(request) {
             );
         }
 
-        await connectDB();
+        const projects = await prisma.project.findMany({
+            where: { companyId: session.user.id },
+            orderBy: { createdAt: 'desc' }
+        });
 
-        const projects = await Project.find({ companyId: session.user.id })
-            .sort({ createdAt: -1 });
+        // Format if necessary (e.g. reconstruct budget object)
+        const formattedProjects = projects.map(p => ({
+            ...p,
+            budget: {
+                min: p.minBudget,
+                max: p.maxBudget,
+                currency: p.currency
+            }
+        }));
 
-        return NextResponse.json({ projects }, { status: 200 });
+        return NextResponse.json({ projects: formattedProjects }, { status: 200 });
 
     } catch (error) {
         console.error('Erreur GET /api/projects/my-projects:', error);
         return NextResponse.json(
-            { error: 'Erreur lordella récupération des projets' },
+            { error: 'Erreur lors de la récupération des projets' },
             { status: 500 }
         );
     }

@@ -1,26 +1,22 @@
 import { NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
-import FreelanceProfile from '@/models/FreelanceProfile';
+import prisma from '@/lib/prisma';
 
 export async function GET() {
     try {
-        await connectDB();
-
         // Agregation pour compter les profils par catégorie
-        const stats = await FreelanceProfile.aggregate([
-            {
-                $group: {
-                    _id: '$category',
-                    count: { $sum: 1 }
-                }
+        // Prisma groupBy
+        const stats = await prisma.freelanceProfile.groupBy({
+            by: ['category'],
+            _count: {
+                category: true
             }
-        ]);
+        });
 
         // Convertir en objet pour un accès facile { "Génie Civil": 12, ... }
         const counts = {};
         stats.forEach(item => {
-            if (item._id) {
-                counts[item._id] = item.count;
+            if (item.category) {
+                counts[item.category] = item._count.category;
             }
         });
 

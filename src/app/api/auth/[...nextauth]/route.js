@@ -1,11 +1,12 @@
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
-import connectDB from '@/lib/mongodb';
-import User from '@/models/User';
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import prisma from "@/lib/prisma";
 import bcrypt from 'bcryptjs';
 
 export const authOptions = {
+    adapter: PrismaAdapter(prisma),
     providers: [
         GoogleProvider({
             clientId: process.env.GOOGLE_CLIENT_ID,
@@ -19,17 +20,24 @@ export const authOptions = {
             },
             async authorize(credentials) {
                 try {
-                    await connectDB();
-
                     if (!credentials?.email || !credentials?.password) {
                         throw new Error('Email et mot de passe requis');
                     }
 
                     // Trouver l'utilisateur
-                    const user = await User.findOne({ email: credentials.email.toLowerCase() });
+                    const user = await prisma.user.findUnique({
+                        where: {
+                            email: credentials.email.toLowerCase()
+                        }
+                    });
 
                     if (!user) {
                         throw new Error('Email ou mot de passe incorrect');
+                    }
+
+                    // Vérifier si l'utilisateur a un mot de passe (cas login social)
+                    if (!user.password) {
+                        throw new Error('Veuillez vous connecter avec Google');
                     }
 
                     // Vérifier le mot de passe
@@ -39,14 +47,9 @@ export const authOptions = {
                         throw new Error('Email ou mot de passe incorrect');
                     }
 
-                    // Vérifier si l'email est vérifié (désactivé en développement)
-                    // if (!user.isVerified) {
-                    //     throw new Error('Veuillez vérifier votre email avant de vous connecter. Consultez votre boîte de réception.');
-                    // }
-
                     // Retourner l'utilisateur (sans le mot de passe)
                     return {
-                        id: user._id.toString(),
+                        id: user.id,
                         email: user.email,
                         firstName: user.firstName,
                         lastName: user.lastName,

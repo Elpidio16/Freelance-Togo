@@ -2,8 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import bcrypt from 'bcryptjs';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import connectDB from '@/lib/mongodb';
-import User from '@/models/User';
+import prisma from '@/lib/prisma';
 
 // POST /api/auth/change-password
 export async function POST(request) {
@@ -16,8 +15,6 @@ export async function POST(request) {
                 { status: 401 }
             );
         }
-
-        await connectDB();
 
         const body = await request.json();
         const { currentPassword, newPassword } = body;
@@ -38,7 +35,9 @@ export async function POST(request) {
         }
 
         // Récupérer l'utilisateur
-        const user = await User.findById(session.user.id);
+        const user = await prisma.user.findUnique({
+            where: { id: session.user.id }
+        });
 
         if (!user) {
             return NextResponse.json(
@@ -61,8 +60,10 @@ export async function POST(request) {
         const hashedPassword = await bcrypt.hash(newPassword, 10);
 
         // Mettre à jour le mot de passe
-        user.password = hashedPassword;
-        await user.save();
+        await prisma.user.update({
+            where: { id: user.id },
+            data: { password: hashedPassword }
+        });
 
         return NextResponse.json({
             success: true,

@@ -1,7 +1,4 @@
-import connectDB from './mongodb';
-import Notification from '@/models/Notification';
-import NotificationPreference from '@/models/NotificationPreference';
-import User from '@/models/User';
+import prisma from '@/lib/prisma';
 import * as emailService from './email';
 
 /**
@@ -9,9 +6,9 @@ import * as emailService from './email';
  */
 async function shouldSendEmail(userId, notificationType) {
     try {
-        await connectDB();
-
-        const preferences = await NotificationPreference.findOne({ userId });
+        const preferences = await prisma.notificationPreference.findUnique({
+            where: { userId }
+        });
 
         // If no preferences set, default to true
         if (!preferences || !preferences.emailNotifications) {
@@ -27,7 +24,14 @@ async function shouldSendEmail(userId, notificationType) {
         };
 
         const prefKey = typeMap[notificationType];
-        return prefKey ? preferences.emailPreferences?.[prefKey] !== false : true;
+        // emailPreferences is JSON in Prisma
+        // We need to check if it exists and access the key.
+        if (prefKey && preferences.emailPreferences && typeof preferences.emailPreferences === 'object') {
+            const val = preferences.emailPreferences[prefKey];
+            return val !== false;
+        }
+        return true;
+
     } catch (error) {
         console.error('Error checking email preferences:', error);
         return true; // Default to sending if error
@@ -47,22 +51,24 @@ export async function createNotification({
     emailData = null // Optional: data for email notification
 }) {
     try {
-        await connectDB();
-
         // Create in-app notification
-        const notification = await Notification.create({
-            userId,
-            type,
-            title,
-            message,
-            link,
-            metadata,
-            category: type,
+        const notification = await prisma.notification.create({
+            data: {
+                userId,
+                type,
+                title,
+                message,
+                link: link || '',
+                metadata: metadata || {},
+                // category: type, // Schema does not have category? Mongoose model did? Let's assume type is enough or metadata.
+                // Schema has 'type' String.
+                read: false
+            }
         });
 
         // Check if we should send email
         if (emailData && await shouldSendEmail(userId, type)) {
-            const user = await User.findById(userId);
+            const user = await prisma.user.findUnique({ where: { id: userId } });
 
             if (user?.email) {
                 let emailSent = false;
@@ -112,9 +118,13 @@ export async function createNotification({
 
                 // Update notification with email status
                 if (emailSent) {
-                    notification.emailSent = true;
-                    notification.emailSentAt = new Date();
-                    await notification.save();
+                    await prisma.notification.update({
+                        where: { id: notification.id },
+                        data: {
+                            emailSent: true,
+                            emailSentAt: new Date()
+                        }
+                    });
                 }
             }
         }
@@ -142,7 +152,7 @@ export const NotificationTypes = {
  * Create message notification with email
  */
 export async function createMessageNotification(userId, senderName, senderId, conversationId, messagePreview) {
-    const user = await User.findById(userId);
+    const user = await prisma.user.findUnique({ where: { id: userId } });
 
     return createNotification({
         userId,
@@ -169,7 +179,7 @@ export async function createApplicationNotification(userId, projectTitle, status
         new: `Nouvelle candidature reçue pour "${projectTitle}"`,
     };
 
-    const user = await User.findById(userId);
+    const user = await prisma.user.findUnique({ where: { id: userId } });
 
     return createNotification({
         userId,
@@ -193,7 +203,7 @@ export async function createApplicationNotification(userId, projectTitle, status
  * Create review notification with email
  */
 export async function createReviewNotification(userId, companyName, rating, projectTitle, projectId) {
-    const user = await User.findById(userId);
+    const user = await prisma.user.findUnique({ where: { id: userId } });
 
     return createNotification({
         userId,
@@ -214,7 +224,7 @@ export async function createReviewNotification(userId, companyName, rating, proj
  * Create project notification with email
  */
 export async function createProjectNotification(userId, projectTitle, projectData) {
-    const user = await User.findById(userId);
+    const user = await prisma.user.findUnique({ where: { id: userId } });
 
     return createNotification({
         userId,
@@ -238,13 +248,15 @@ export async function createProjectNotification(userId, projectTitle, projectDat
  */
 export async function getNotificationPreferences(userId) {
     try {
-        await connectDB();
-
-        let preferences = await NotificationPreference.findOne({ userId });
+        let preferences = await prisma.notificationPreference.findUnique({
+            where: { userId }
+        });
 
         // Create default preferences if none exist
         if (!preferences) {
-            preferences = await NotificationPreference.create({ userId });
+            preferences = await prisma.notificationPreference.create({
+                data: { userId }
+            });
         }
 
         return preferences;
@@ -259,13 +271,12 @@ export async function getNotificationPreferences(userId) {
  */
 export async function updateNotificationPreferences(userId, updates) {
     try {
-        await connectDB();
-
-        const preferences = await NotificationPreference.findOneAndUpdate(
-            { userId },
-            { ...updates, updatedAt: new Date() },
-            { new: true, upsert: true }
-        );
+        // Prisma upsert is clean here
+        const preferences = await prisma.notificationPreference.upsert({
+            where: { userId },
+            update: { ...updates, updatedAt: new Date() },
+            create: { userId, ...updates }
+        });
 
         return preferences;
     } catch (error) {

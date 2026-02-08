@@ -1,10 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import connectDB from '@/lib/mongodb';
-import Project from '@/models/Project';
-import ProjectApplication from '@/models/ProjectApplication';
-import FreelanceProfile from '@/models/FreelanceProfile';
+import prisma from '@/lib/prisma';
 
 // POST /api/projects/[id]/apply - Apply to project (freelance only)
 export async function POST(request, { params }) {
@@ -22,10 +19,11 @@ export async function POST(request, { params }) {
             );
         }
 
-        await connectDB();
-
         const projectId = params.id;
-        const project = await Project.findById(projectId);
+
+        const project = await prisma.project.findUnique({
+            where: { id: projectId }
+        });
 
         if (!project) {
             return NextResponse.json(
@@ -42,9 +40,18 @@ export async function POST(request, { params }) {
         }
 
         // Check if already applied
-        const existingApplication = await ProjectApplication.findOne({
-            projectId,
-            freelanceId: session.user.id,
+        // Prisma doesn't have a direct compound query utility like findOne({ projectId, freelanceId })
+        // unless we defined a @@unique([projectId, freelanceId]) in schema.
+        // In our schema: @@unique([projectId, freelanceId]) IS defined for ProjectApplication.
+        // So we can use findUnique with the compound key, or findFirst.
+
+        const existingApplication = await prisma.projectApplication.findUnique({
+            where: {
+                projectId_freelanceId: {
+                    projectId: projectId,
+                    freelanceId: session.user.id
+                }
+            }
         });
 
         if (existingApplication) {
@@ -65,7 +72,7 @@ export async function POST(request, { params }) {
             );
         }
 
-        if (proposedRate <= 0) {
+        if (parseFloat(proposedRate) <= 0) {
             return NextResponse.json(
                 { error: 'Le tarif proposé doit être supérieur à 0' },
                 { status: 400 }
@@ -73,13 +80,15 @@ export async function POST(request, { params }) {
         }
 
         // Create application
-        const application = await ProjectApplication.create({
-            projectId,
-            freelanceId: session.user.id,
-            coverLetter,
-            proposedRate,
-            estimatedDuration,
-            status: 'pending',
+        const application = await prisma.projectApplication.create({
+            data: {
+                projectId,
+                freelanceId: session.user.id,
+                coverLetter,
+                proposedRate: parseFloat(proposedRate),
+                estimatedDuration,
+                status: 'pending',
+            }
         });
 
         return NextResponse.json(
@@ -94,7 +103,7 @@ export async function POST(request, { params }) {
     } catch (error) {
         console.error('Erreur POST /api/projects/[id]/apply:', error);
 
-        if (error.code === 11000) {
+        if (error.code === 'P2002') { // Unique constraint
             return NextResponse.json(
                 { error: 'Vous avez déjà postulé à ce projet' },
                 { status: 400 }

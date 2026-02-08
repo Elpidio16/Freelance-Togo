@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import connectDB from '@/lib/mongodb';
-import ProjectApplication from '@/models/ProjectApplication';
-import Project from '@/models/Project';
+import prisma from '@/lib/prisma';
 
 // PUT /api/applications/[id]/status - Update application status (company only)
 export async function PUT(request, { params }) {
@@ -21,11 +19,13 @@ export async function PUT(request, { params }) {
             );
         }
 
-        await connectDB();
-
         const applicationId = params.id;
-        const application = await ProjectApplication.findById(applicationId)
-            .populate('projectId');
+
+        // Find application with project details
+        const application = await prisma.projectApplication.findUnique({
+            where: { id: applicationId },
+            include: { project: true }
+        });
 
         if (!application) {
             return NextResponse.json(
@@ -34,10 +34,10 @@ export async function PUT(request, { params }) {
             );
         }
 
-        const project = application.projectId;
+        const project = application.project;
 
         // Verify ownership
-        if (project.companyId.toString() !== session.user.id) {
+        if (project.companyId !== session.user.id) {
             return NextResponse.json(
                 { error: 'Vous n\'êtes pas autorisé à modifier cette candidature' },
                 { status: 403 }
@@ -55,36 +55,62 @@ export async function PUT(request, { params }) {
         }
 
         // Update application
-        application.status = status;
-        application.respondedAt = new Date();
-        await application.save();
+        // Transaction needed if status is 'accepted' to update project and reject others?
+        // Prisma transaction:
 
-        // If accepted, update project status and reject other applications
         if (status === 'accepted') {
-            await Project.findByIdAndUpdate(project._id, {
-                status: 'in-progress',
-                acceptedFreelanceId: application.freelanceId,
-            });
-
-            // Reject all other pending applications
-            await ProjectApplication.updateMany(
-                {
-                    projectId: project._id,
-                    _id: { $ne: applicationId },
-                    status: 'pending',
-                },
-                {
+            await prisma.$transaction([
+                // Update this application
+                prisma.projectApplication.update({
+                    where: { id: applicationId },
+                    data: {
+                        status: 'accepted',
+                        respondedAt: new Date()
+                    }
+                }),
+                // Update project
+                prisma.project.update({
+                    where: { id: project.id },
+                    data: {
+                        status: 'in-progress',
+                        acceptedFreelanceId: application.freelanceId
+                    }
+                }),
+                // Reject others
+                prisma.projectApplication.updateMany({
+                    where: {
+                        projectId: project.id,
+                        id: { not: applicationId },
+                        status: 'pending'
+                    },
+                    data: {
+                        status: 'rejected',
+                        respondedAt: new Date()
+                    }
+                })
+            ]);
+        } else {
+            // Just reject this one
+            await prisma.projectApplication.update({
+                where: { id: applicationId },
+                data: {
                     status: 'rejected',
-                    respondedAt: new Date(),
+                    respondedAt: new Date()
                 }
-            );
+            });
         }
+
+        // Fetch updated application to return? Or just return success message.
+        // Frontend might expect updated application object.
+        const updatedApplication = await prisma.projectApplication.findUnique({
+            where: { id: applicationId }
+        });
 
         return NextResponse.json(
             {
                 success: true,
                 message: `Candidature ${status === 'accepted' ? 'acceptée' : 'refusée'}`,
-                application,
+                application: updatedApplication,
             },
             { status: 200 }
         );

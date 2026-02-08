@@ -1,12 +1,11 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import connectDB from '@/lib/mongodb';
-import FreelanceProfile from '@/models/FreelanceProfile';
-import User from '@/models/User';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import prisma from '@/lib/prisma';
 
 export async function POST(request) {
     try {
-        const session = await getServerSession();
+        const session = await getServerSession(authOptions);
 
         if (!session || !session.user) {
             return NextResponse.json(
@@ -15,10 +14,11 @@ export async function POST(request) {
             );
         }
 
-        await connectDB();
-
         // Vérifier que l'utilisateur est un freelance
-        const user = await User.findOne({ email: session.user.email });
+        const user = await prisma.user.findUnique({
+            where: { email: session.user.email }
+        });
+
         if (!user || user.role !== 'freelance') {
             return NextResponse.json(
                 { error: 'Seuls les freelances peuvent créer un profil freelance' },
@@ -27,7 +27,10 @@ export async function POST(request) {
         }
 
         // Vérifier si un profil existe déjà
-        const existingProfile = await FreelanceProfile.findOne({ userId: user._id });
+        const existingProfile = await prisma.freelanceProfile.findUnique({
+            where: { userId: user.id }
+        });
+
         if (existingProfile) {
             return NextResponse.json(
                 { error: 'Vous avez déjà un profil freelance' },
@@ -46,6 +49,8 @@ export async function POST(request) {
             experience,
             education,
             languages,
+            certifications,
+            socialLinks
         } = body;
 
         // Validation stricte
@@ -57,7 +62,7 @@ export async function POST(request) {
         }
 
         // Vérifier qu'il y a au moins une certification
-        if (!body.certifications || body.certifications.length === 0) {
+        if (!certifications || certifications.length === 0) {
             return NextResponse.json(
                 { error: 'Au moins une certification est requise' },
                 { status: 400 }
@@ -65,8 +70,8 @@ export async function POST(request) {
         }
 
         // Vérifier qu'il y a au moins un lien social
-        const socialLinks = body.socialLinks || {};
-        const hasAtLeastOneLink = Object.values(socialLinks).some(link => link && link.trim() !== '');
+        const linksToCheck = socialLinks || {};
+        const hasAtLeastOneLink = Object.values(linksToCheck).some(link => link && link.trim() !== '');
         if (!hasAtLeastOneLink) {
             return NextResponse.json(
                 { error: 'Au moins un lien social est requis' },
@@ -75,30 +80,32 @@ export async function POST(request) {
         }
 
         // Créer le profil freelance
-        const profile = await FreelanceProfile.create({
-            userId: user._id,
-            title,
-            bio,
-            skills: skills || [],
-            hourlyRate: hourlyRate || 0,
-            dailyRate: dailyRate || 0,
-            availability: availability || 'disponible',
-            certifications: body.certifications || [],
-            socialLinks: socialLinks,
-            experience: experience || [],
-            education: education || [],
-            languages: languages || [],
-            portfolio: [],
-            averageRating: 0,
-            totalReviews: 0,
-            completedProjects: 0,
+        const profile = await prisma.freelanceProfile.create({
+            data: {
+                userId: user.id,
+                title,
+                bio,
+                skills: skills || [],
+                hourlyRate: parseFloat(hourlyRate) || 0,
+                dailyRate: parseFloat(dailyRate) || 0,
+                availability: availability || 'disponible',
+                certifications: certifications || [],
+                socialLinks: socialLinks || {},
+                experience: experience || [],
+                education: education || [],
+                languages: languages || [],
+                portfolio: [],
+                averageRating: 0,
+                totalReviews: 0,
+                completedProjects: 0,
+            }
         });
 
         return NextResponse.json(
             {
                 message: 'Profil créé avec succès !',
                 profile: {
-                    id: profile._id,
+                    id: profile.id,
                     title: profile.title,
                 }
             },
@@ -116,7 +123,7 @@ export async function POST(request) {
 
 export async function GET(request) {
     try {
-        const session = await getServerSession();
+        const session = await getServerSession(authOptions);
 
         if (!session || !session.user) {
             return NextResponse.json(
@@ -125,9 +132,10 @@ export async function GET(request) {
             );
         }
 
-        await connectDB();
+        const user = await prisma.user.findUnique({
+            where: { email: session.user.email }
+        });
 
-        const user = await User.findOne({ email: session.user.email });
         if (!user) {
             return NextResponse.json(
                 { error: 'Utilisateur non trouvé' },
@@ -135,7 +143,9 @@ export async function GET(request) {
             );
         }
 
-        const profile = await FreelanceProfile.findOne({ userId: user._id });
+        const profile = await prisma.freelanceProfile.findUnique({
+            where: { userId: user.id }
+        });
 
         if (!profile) {
             return NextResponse.json(
@@ -157,7 +167,7 @@ export async function GET(request) {
 
 export async function PUT(request) {
     try {
-        const session = await getServerSession();
+        const session = await getServerSession(authOptions);
 
         if (!session || !session.user) {
             return NextResponse.json(
@@ -166,9 +176,10 @@ export async function PUT(request) {
             );
         }
 
-        await connectDB();
+        const user = await prisma.user.findUnique({
+            where: { email: session.user.email }
+        });
 
-        const user = await User.findOne({ email: session.user.email });
         if (!user) {
             return NextResponse.json(
                 { error: 'Utilisateur non trouvé' },
@@ -178,18 +189,16 @@ export async function PUT(request) {
 
         const body = await request.json();
 
-        const profile = await FreelanceProfile.findOneAndUpdate(
-            { userId: user._id },
-            { ...body, updatedAt: new Date() },
-            { new: true }
-        );
+        // Separate fields to ensure type safety if needed, or spread body if it matches
+        // Prisma update matches existing fields.
 
-        if (!profile) {
-            return NextResponse.json(
-                { error: 'Profil non trouvé' },
-                { status: 404 }
-            );
-        }
+        // Remove _id or id from body if present to avoid errors
+        const { _id, id, userId, createdAt, updatedAt, ...updateData } = body;
+
+        const profile = await prisma.freelanceProfile.update({
+            where: { userId: user.id },
+            data: updateData,
+        });
 
         return NextResponse.json(
             {

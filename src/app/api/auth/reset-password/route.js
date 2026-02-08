@@ -1,14 +1,10 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import connectDB from '@/lib/mongodb';
-import User from '@/models/User';
-import PasswordReset from '@/models/PasswordReset';
+import prisma from '@/lib/prisma';
 
 // POST /api/auth/reset-password
 export async function POST(request) {
     try {
-        await connectDB();
-
         const body = await request.json();
         const { token, password } = body;
 
@@ -28,12 +24,12 @@ export async function POST(request) {
         }
 
         // Rechercher le token de réinitialisation
-        const resetEntry = await PasswordReset.findOne({
-            token,
-            used: false,
+        // Note: findUnique can only be used on unique fields. 'token' is unique in schema.
+        const resetEntry = await prisma.passwordReset.findUnique({
+            where: { token }
         });
 
-        if (!resetEntry) {
+        if (!resetEntry || resetEntry.used) {
             return NextResponse.json(
                 { error: 'Token invalide ou déjà utilisé' },
                 { status: 400 }
@@ -49,7 +45,9 @@ export async function POST(request) {
         }
 
         // Rechercher l'utilisateur
-        const user = await User.findById(resetEntry.userId);
+        const user = await prisma.user.findUnique({
+            where: { id: resetEntry.userId }
+        });
 
         if (!user) {
             return NextResponse.json(
@@ -62,14 +60,20 @@ export async function POST(request) {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Mettre à jour le mot de passe
-        user.password = hashedPassword;
-        user.loginAttempts = 0; // Réinitialiser les tentatives de connexion
-        user.lockUntil = undefined; // Débloquer le compte si bloqué
-        await user.save();
+        await prisma.user.update({
+            where: { id: user.id },
+            data: {
+                password: hashedPassword,
+                loginAttempts: 0,
+                lockUntil: null, // Prisma uses null for undefined/null
+            }
+        });
 
         // Marquer le token comme utilisé
-        resetEntry.used = true;
-        await resetEntry.save();
+        await prisma.passwordReset.update({
+            where: { id: resetEntry.id },
+            data: { used: true }
+        });
 
         // Optionnel: Envoyer un email de confirmation
         // await sendEmail({ ... });

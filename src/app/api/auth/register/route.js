@@ -1,16 +1,11 @@
 import { NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
-import User from '@/models/User';
-import CompanyProfile from '@/models/CompanyProfile';
-import VerificationToken from '@/models/VerificationToken';
+import prisma from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
 import { sendVerificationEmail } from '@/lib/email';
 
 export async function POST(request) {
     try {
-        await connectDB();
-
         const body = await request.json();
         const {
             email,
@@ -27,8 +22,18 @@ export async function POST(request) {
             website,
         } = body;
 
+        if (!email || !password || !role || !firstName || !lastName) {
+            return NextResponse.json(
+                { error: 'Champs obligatoires manquants' },
+                { status: 400 }
+            );
+        }
+
         // Vérifier si l'utilisateur existe déjà
-        const existingUser = await User.findOne({ email });
+        const existingUser = await prisma.user.findUnique({
+            where: { email: email.toLowerCase() }
+        });
+
         if (existingUser) {
             return NextResponse.json(
                 { error: 'Un compte avec cet email existe déjà' },
@@ -39,9 +44,9 @@ export async function POST(request) {
         // Hasher le mot de passe
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Créer l'utilisateur (non vérifié)
-        const user = await User.create({
-            email,
+        // Préparer les données de l'utilisateur
+        const userData = {
+            email: email.toLowerCase(),
             password: hashedPassword,
             role,
             firstName,
@@ -50,29 +55,37 @@ export async function POST(request) {
             city,
             isVerified: false,
             emailVerified: null,
-        });
+            // Créer le profil entreprise directement si nécessaire
+            ...(role === 'company' && companyName ? {
+                companyProfile: {
+                    create: {
+                        companyName,
+                        sector,
+                        size: companySize,
+                        website: website || '',
+                        location: city,
+                        description: '',
+                    }
+                }
+            } : {})
+        };
 
-        // Si c'est une entreprise, créer le profil entreprise
-        if (role === 'company' && companyName) {
-            await CompanyProfile.create({
-                userId: user._id,
-                companyName,
-                sector,
-                size: companySize,
-                website: website || '',
-                location: city,
-                description: '',
-            });
-        }
+        // Créer l'utilisateur (et le profil entreprise via nested write)
+        const user = await prisma.user.create({
+            data: userData,
+        });
 
         // Générer un token de vérification
         const verificationToken = uuidv4();
+        const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
 
         // Sauvegarder le token en base
-        await VerificationToken.create({
-            email: user.email,
-            token: verificationToken,
-            expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24h
+        await prisma.verificationToken.create({
+            data: {
+                identifier: email.toLowerCase(),
+                token: verificationToken,
+                expires: expires,
+            }
         });
 
         // Envoyer l'email de vérification

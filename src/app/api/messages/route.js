@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import connectDB from '@/lib/mongodb';
-import Message from '@/models/Message';
-import Conversation from '@/models/Conversation';
+import prisma from '@/lib/prisma';
 
 // POST /api/messages - Send a message
 export async function POST(request) {
@@ -13,8 +11,6 @@ export async function POST(request) {
         if (!session) {
             return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
         }
-
-        await connectDB();
 
         const body = await request.json();
         const { conversationId, receiverId, content } = body;
@@ -27,7 +23,10 @@ export async function POST(request) {
         }
 
         // Verify conversation exists and user is participant
-        const conversation = await Conversation.findById(conversationId);
+        const conversation = await prisma.conversation.findUnique({
+            where: { id: conversationId },
+            include: { participants: true } // Need participants to check access
+        });
 
         if (!conversation) {
             return NextResponse.json(
@@ -37,7 +36,7 @@ export async function POST(request) {
         }
 
         const isParticipant = conversation.participants.some(
-            (p) => p.toString() === session.user.id
+            (p) => p.id === session.user.id
         );
 
         if (!isParticipant) {
@@ -48,30 +47,55 @@ export async function POST(request) {
         }
 
         // Create message
-        const message = await Message.create({
-            conversationId,
-            senderId: session.user.id,
-            receiverId,
-            content: content.trim(),
+        const message = await prisma.message.create({
+            data: {
+                conversationId,
+                senderId: session.user.id,
+                receiverId,
+                content: content.trim(),
+            },
+            include: {
+                sender: {
+                    select: {
+                        id: true,
+                        firstName: true,
+                        lastName: true
+                    }
+                }
+            }
         });
 
-        // Update conversation
-        conversation.lastMessage = content.substring(0, 100);
-        conversation.lastMessageAt = new Date();
-        conversation.incrementUnread(receiverId);
-        await conversation.save();
+        // Update conversation manually for unreadCount
+        // Fetch current unreadCount from conversation
+        let newUnreadCount = conversation.unreadCount || {};
+        if (typeof newUnreadCount !== 'object') {
+            try { newUnreadCount = JSON.parse(newUnreadCount); } catch (e) { }
+        }
 
-        // Populate sender info
-        await message.populate('senderId', 'firstName lastName');
+        // Ensure newUnreadCount is an object
+        if (!newUnreadCount || typeof newUnreadCount !== 'object') newUnreadCount = {};
+
+        const currentCount = (newUnreadCount[receiverId] || 0) + 1;
+        newUnreadCount[receiverId] = currentCount;
+
+        await prisma.conversation.update({
+            where: { id: conversationId },
+            data: {
+                lastMessage: content.substring(0, 100),
+                lastMessageAt: new Date(),
+                unreadCount: newUnreadCount
+            }
+        });
 
         return NextResponse.json(
             {
                 success: true,
                 message: {
-                    _id: message._id,
+                    _id: message.id, // Compatibility
+                    id: message.id,
                     content: message.content,
-                    senderId: message.senderId._id,
-                    senderName: `${message.senderId.firstName} ${message.senderId.lastName}`,
+                    senderId: message.senderId,
+                    senderName: `${message.sender.firstName} ${message.sender.lastName}`,
                     isMine: true,
                     createdAt: message.createdAt,
                 },

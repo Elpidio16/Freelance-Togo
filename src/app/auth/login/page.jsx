@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -11,7 +11,7 @@ import AuthLayout from '@/components/layout/AuthLayout';
 import { validateEmail } from '@/lib/validation';
 import styles from './login.module.css';
 
-export default function LoginPage() {
+function LoginContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { addToast } = useToast();
@@ -163,5 +163,13 @@ export default function LoginPage() {
                 </p>
             </div>
         </AuthLayout>
+    );
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={<div>Chargement...</div>}>
+            <LoginContent />
+        </Suspense>
     );
 }

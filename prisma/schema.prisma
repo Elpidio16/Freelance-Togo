@@ -2,7 +2,8 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
+  // output   = "../node_modules/.prisma/client" // Default is fine, usually auto-detected relative to schema
 }
 
 datasource db {
@@ -10,7 +11,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Modèle User (votre modèle existant + NextAuth)
+// ---------------------------------------------------------
+// USER & AUTHENTICATION
+// ---------------------------------------------------------
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -20,12 +24,11 @@ model User {
   password      String?   // Pour l'auth Credentials
   role          String    @default("freelance") // freelance, company, admin
   
-  // Champs spécifiques à votre appli
+  // Champs communs
   firstName     String?
   lastName      String?
   phone         String?
   city          String?
-  companyName   String?
   isVerified    Boolean   @default(false)
   loginAttempts Int       @default(0)
   lockUntil     DateTime?
@@ -33,13 +36,42 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  // Relations
+  // Relations Auth
   accounts      Account[]
   sessions      Session[]
-  profile       FreelanceProfile?
+  
+  // Relations Profils
+  freelanceProfile FreelanceProfile?
+  companyProfile   CompanyProfile?
+  
+  // Relations Projets (Company)
+  postedProjects   Project[] @relation("CompanyProjects")
+  
+  // Relations Projets (Freelance)
+  acceptedProjects Project[] @relation("FreelanceProjects")
+  applications     ProjectApplication[]
+
+  // Relations Reviews
+  reviewsReceived  Review[] @relation("ReceivedReviews")
+  reviewsGiven     Review[] @relation("GivenReviews") // Optionnel, si on veut tracker qui a donné l'avis
+
+  // Relations Messages & Conversations
+  sentMessages     Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
+  conversations    Conversation[] @relation("UserConversations") // Many-to-many implicit
+
+  // Relations Notifications
+  notifications          Notification[]
+  notificationPreference NotificationPreference?
+
+  // Relations Favorites
+  favoritesGiven   Favorite[] @relation("CompanyFavorites") // Favorites crées par ce user (Company)
+  favoritesReceived Favorite[] @relation("FreelanceFavorites") // Ce user (Freelance) est favori
+  
+  // Password Reset
+  passwordResets   PasswordReset[]
 }
 
-// Modèle Profil Freelance (traduit de Mongoose)
 model FreelanceProfile {
   id              String   @id @default(cuid())
   userId          String   @unique
@@ -47,14 +79,14 @@ model FreelanceProfile {
   
   title           String
   bio             String?  @db.Text
-  category        String   // Enum géré comme String pour simplifier
+  category        String
   skills          String[] // Tableau de chaînes
   
   hourlyRate      Float?
   dailyRate       Float?
   availability    String   @default("disponible") // disponible, occupé, bientôt disponible
   
-  // Objets complexes stockés en JSONb (Postgres est super pour ça !)
+  // Données structurées (JSON)
   portfolio       Json?    // [{ title, description, image, link, technologies }]
   experience      Json?    // [{ company, role, duration, description, startDate, endDate, current }]
   certifications  Json?    // [{ name, issuer, date, credentialId, url }]
@@ -71,7 +103,240 @@ model FreelanceProfile {
   updatedAt       DateTime @updatedAt
 }
 
-// Modèles Nécessaires pour NextAuth (Auth.js)
+model CompanyProfile {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  companyName   String
+  sector        String
+  size          String   // '1-10', '11-50', etc.
+  website       String?
+  description   String?  @db.Text
+  logo          String?
+  location      String?
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// ---------------------------------------------------------
+// PROJECTS & JOBS
+// ---------------------------------------------------------
+
+model Project {
+  id            String   @id @default(cuid())
+  companyId     String
+  company       User     @relation("CompanyProjects", fields: [companyId], references: [id], onDelete: Cascade)
+  
+  title         String
+  description   String   @db.Text
+  skills        String[] // Tableau de compétences requises
+  
+  // Budget (Flattened)
+  minBudget     Float
+  maxBudget     Float
+  currency      String   @default("FCFA")
+  
+  projectType   String   // 'fixed', 'hourly'
+  deadline      DateTime
+  status        String   @default("open") // 'open', 'in-progress', 'completed', 'cancelled'
+  location      String   @default("Remote")
+  experienceLevel String @default("any") // 'junior', 'intermediate', 'senior', 'any'
+  
+  // Relations
+  acceptedFreelanceId String?
+  acceptedFreelance   User?    @relation("FreelanceProjects", fields: [acceptedFreelanceId], references: [id])
+  
+  applications  ProjectApplication[]
+  reviews       Review[] // Normalement une seule review, mais array par convention
+  conversations Conversation[]
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([status])
+  @@index([companyId])
+  @@index([createdAt])
+}
+
+model ProjectApplication {
+  id                String   @id @default(cuid())
+  projectId         String
+  project           Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  freelanceId       String
+  freelance         User     @relation(fields: [freelanceId], references: [id], onDelete: Cascade)
+  
+  coverLetter       String   @db.Text
+  proposedRate      Float
+  estimatedDuration String
+  status            String   @default("pending") // 'pending', 'accepted', 'rejected'
+  
+  appliedAt         DateTime @default(now())
+  respondedAt       DateTime?
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([projectId, freelanceId])
+  @@index([freelanceId])
+  @@index([projectId])
+}
+
+// ---------------------------------------------------------
+// REVIEWS & FEEDBACK
+// ---------------------------------------------------------
+
+model Review {
+  id             String   @id @default(cuid())
+  projectId      String
+  project        Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  freelanceId    String
+  freelance      User     @relation("ReceivedReviews", fields: [freelanceId], references: [id], onDelete: Cascade)
+  
+  companyId      String
+  company        User     @relation("GivenReviews", fields: [companyId], references: [id]) // Celui qui donne la review (Company)
+  
+  rating         Int // 1-5
+  comment        String   @db.Text
+  skillsRating   Json     // { technical, communication, deadline, quality }
+  wouldRecommend Boolean  @default(true)
+  
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([projectId]) // Une seule review par projet (pour simplifier, ou One-to-One)
+  @@index([freelanceId])
+  @@index([companyId])
+}
+
+// ---------------------------------------------------------
+// MESSAGING & NOTIFICATIONS
+// ---------------------------------------------------------
+
+model Conversation {
+  id            String    @id @default(cuid())
+  projectId     String?
+  project       Project?  @relation(fields: [projectId], references: [id])
+  
+  participants  User[]    @relation("UserConversations")
+  
+  lastMessage   String?
+  lastMessageAt DateTime  @default(now())
+  
+  unreadCount   Json?     // Map<UserId, Count> stocké en JSON
+  
+  messages      Message[]
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  
+  senderId       String
+  sender         User         @relation("SentMessages", fields: [senderId], references: [id])
+  
+  receiverId     String
+  receiver       User         @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  
+  content        String       @db.Text
+  read           Boolean      @default(false)
+  readAt         DateTime?
+  
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([conversationId, createdAt])
+  @@index([senderId])
+  @@index([receiverId])
+}
+
+model Notification {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  type        String    // 'message', 'application', 'project', etc.
+  title       String
+  message     String
+  link        String?
+  read        Boolean   @default(false)
+  readAt      DateTime?
+  
+  emailSent   Boolean   @default(false)
+  emailSentAt DateTime?
+  
+  category    String?
+  metadata    Json?
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([userId, createdAt])
+  @@index([userId, read])
+}
+
+model NotificationPreference {
+  id                 String   @id @default(cuid())
+  userId             String   @unique
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  emailNotifications Boolean  @default(true)
+  emailPreferences   Json     // { messages: true, applications: true ... }
+  inAppNotifications Boolean  @default(true)
+  emailDigest        String   @default("instant")
+  
+  updatedAt          DateTime @updatedAt
+}
+
+// ---------------------------------------------------------
+// MISC
+// ---------------------------------------------------------
+
+model Favorite {
+  id          String   @id @default(cuid())
+  companyId   String
+  company     User     @relation("CompanyFavorites", fields: [companyId], references: [id], onDelete: Cascade)
+  
+  freelanceId String
+  freelance   User     @relation("FreelanceFavorites", fields: [freelanceId], references: [id], onDelete: Cascade)
+  
+  poolName    String   @default("Général")
+  notes       String?  @db.Text
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([companyId, freelanceId])
+  @@index([companyId])
+  @@index([poolName])
+}
+
+model PasswordReset {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  
+  createdAt DateTime @default(now())
+
+  @@index([token])
+}
+
+
+// ---------------------------------------------------------
+// NEXT AUTH
+// ---------------------------------------------------------
+
 model Account {
   id                 String  @id @default(cuid())
   userId             String

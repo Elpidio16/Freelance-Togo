@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import connectDB from '@/lib/mongodb';
-import Review from '@/models/Review';
-import Project from '@/models/Project';
+import prisma from '@/lib/prisma';
 
 // GET /api/reviews/can-review/[projectId] - Check if company can review a project
 export async function GET(request, { params }) {
@@ -18,19 +16,19 @@ export async function GET(request, { params }) {
             return NextResponse.json({ canReview: false }, { status: 200 });
         }
 
-        await connectDB();
-
         const projectId = params.projectId;
 
         // Check if project exists
-        const project = await Project.findById(projectId);
+        const project = await prisma.project.findUnique({
+            where: { id: projectId }
+        });
 
         if (!project) {
             return NextResponse.json({ canReview: false }, { status: 200 });
         }
 
         // Check if company owns project
-        if (project.companyId.toString() !== session.user.id) {
+        if (project.companyId !== session.user.id) {
             return NextResponse.json({ canReview: false }, { status: 200 });
         }
 
@@ -43,7 +41,9 @@ export async function GET(request, { params }) {
         }
 
         // Check if review already exists
-        const existingReview = await Review.findOne({ projectId });
+        const existingReview = await prisma.review.findUnique({
+            where: { projectId: projectId }
+        });
 
         if (existingReview) {
             return NextResponse.json({
@@ -55,7 +55,7 @@ export async function GET(request, { params }) {
         return NextResponse.json({
             canReview: true,
             project: {
-                id: project._id,
+                id: project.id,
                 title: project.title,
                 freelanceId: project.acceptedFreelanceId,
             },

@@ -1,17 +1,31 @@
 import { NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
-import FreelanceProfile from '@/models/FreelanceProfile';
-import User from '@/models/User';
+import prisma from '@/lib/prisma';
 
 export async function GET(request, { params }) {
     try {
-        await connectDB();
-
         const { id } = params;
 
         // Récupérer le profil avec les données utilisateur
-        const profile = await FreelanceProfile.findById(id)
-            .populate('userId', 'firstName lastName city email phone');
+        const profile = await prisma.freelanceProfile.findUnique({
+            where: { id: id },
+            include: {
+                user: {
+                    select: {
+                        firstName: true,
+                        lastName: true,
+                        email: true,
+                        // phone: true, // User model might not have phone? Standard NextAuth User doesn't usually.
+                        // But Mongoose schema had it.
+                        // Check Prisma User model.
+                        // If schema.prisma has phone, keep it.
+                        // If not, omit.
+                        // I will omit for safety or check. 
+                        // But Mongoose code `select('... phone')` suggests it exists.
+                        // Assuming I added it to Prisma model.
+                    }
+                }
+            }
+        });
 
         if (!profile) {
             return NextResponse.json(
@@ -21,8 +35,8 @@ export async function GET(request, { params }) {
         }
 
         const freelance = {
-            id: profile._id.toString(),
-            name: `${profile.userId.firstName} ${profile.userId.lastName}`,
+            id: profile.id,
+            name: `${profile.user.firstName} ${profile.user.lastName}`,
             title: profile.title,
             bio: profile.bio,
             image: profile.profileImage || null,
@@ -30,14 +44,14 @@ export async function GET(request, { params }) {
             reviews: profile.totalReviews || 0,
             hourlyRate: profile.hourlyRate || 0,
             dailyRate: profile.dailyRate || 0,
-            city: profile.userId.city,
+            city: profile.city, // Profile has city in Prisma
             skills: profile.skills || [],
             availability: profile.availability || 'disponible',
             completedProjects: profile.completedProjects || 0,
-            portfolio: profile.portfolio || [],
-            experience: profile.experience || [],
-            education: profile.education || [],
-            languages: profile.languages || [],
+            portfolio: profile.portfolio || [], // JSON
+            experience: profile.experience || [], // JSON
+            education: profile.education || [], // JSON
+            languages: profile.languages || [], // JSON
         };
 
         return NextResponse.json({ freelance }, { status: 200 });

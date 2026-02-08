@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useToast } from '@/hooks/useToast';
 import styles from './submit-review.module.css';
 
-export default function SubmitReviewPage() {
+function SubmitReviewContent() {
     const { data: session, status } = useSession();
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -208,5 +208,13 @@ export default function SubmitReviewPage() {
                 </form>
             </div>
         </div>
+    );
+}
+
+export default function SubmitReviewPage() {
+    return (
+        <Suspense fallback={<div>Chargement...</div>}>
+            <SubmitReviewContent />
+        </Suspense>
     );
 }

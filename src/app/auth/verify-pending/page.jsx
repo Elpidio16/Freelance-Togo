@@ -1,10 +1,11 @@
 'use client';
 
+import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import styles from './pending.module.css';
 
-export default function VerifyPendingPage() {
+function VerifyPendingContent() {
     const searchParams = useSearchParams();
     const email = searchParams.get('email');
 
@@ -48,5 +49,13 @@ export default function VerifyPendingPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function VerifyPendingPage() {
+    return (
+        <Suspense fallback={<div>Chargement...</div>}>
+            <VerifyPendingContent />
+        </Suspense>
     );
 }

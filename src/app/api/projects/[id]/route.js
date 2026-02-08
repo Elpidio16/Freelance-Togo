@@ -1,19 +1,28 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import connectDB from '@/lib/mongodb';
-import Project from '@/models/Project';
-import ProjectApplication from '@/models/ProjectApplication';
-import CompanyProfile from '@/models/CompanyProfile';
+import prisma from '@/lib/prisma';
 
 export async function GET(request, { params }) {
     try {
-        await connectDB();
-
         const projectId = params.id;
 
-        const project = await Project.findById(projectId)
-            .populate('companyId', 'firstName lastName email');
+        const project = await prisma.project.findUnique({
+            where: { id: projectId },
+            include: {
+                company: {
+                    select: {
+                        firstName: true,
+                        lastName: true,
+                        email: true,
+                        companyProfile: true
+                    }
+                },
+                _count: {
+                    select: { applications: true }
+                }
+            }
+        });
 
         if (!project) {
             return NextResponse.json(
@@ -22,29 +31,26 @@ export async function GET(request, { params }) {
             );
         }
 
-        // Get company profile
-        const companyProfile = await CompanyProfile.findOne({
-            userId: project.companyId._id
-        });
-
-        // Count applications
-        const applicationCount = await ProjectApplication.countDocuments({
-            projectId: project._id,
-        });
+        const companyProfile = project.company.companyProfile;
 
         const projectData = {
-            _id: project._id,
+            _id: project.id,
+            id: project.id,
             title: project.title,
             description: project.description,
             skills: project.skills,
-            budget: project.budget,
+            budget: {
+                min: project.minBudget,
+                max: project.maxBudget,
+                currency: project.currency
+            },
             projectType: project.projectType,
             deadline: project.deadline,
             status: project.status,
             location: project.location,
             experienceLevel: project.experienceLevel,
             createdAt: project.createdAt,
-            applicationCount,
+            applicationCount: project._count.applications,
             company: {
                 name: companyProfile?.companyName || 'Entreprise',
                 description: companyProfile?.description,
@@ -80,10 +86,10 @@ export async function PUT(request, { params }) {
             );
         }
 
-        await connectDB();
-
         const projectId = params.id;
-        const project = await Project.findById(projectId);
+        const project = await prisma.project.findUnique({
+            where: { id: projectId }
+        });
 
         if (!project) {
             return NextResponse.json(
@@ -93,7 +99,7 @@ export async function PUT(request, { params }) {
         }
 
         // Verify ownership
-        if (project.companyId.toString() !== session.user.id) {
+        if (project.companyId !== session.user.id) {
             return NextResponse.json(
                 { error: 'Vous n\'êtes pas autorisé à modifier ce projet' },
                 { status: 403 }
@@ -101,28 +107,45 @@ export async function PUT(request, { params }) {
         }
 
         const body = await request.json();
-        const updates = {};
+        const updates = {}; // Data object for Prisma update
 
         // Only allow certain fields to be updated
         const allowedFields = ['title', 'description', 'skills', 'budget', 'deadline', 'location', 'experienceLevel', 'status'];
 
         for (const field of allowedFields) {
             if (body[field] !== undefined) {
-                updates[field] = body[field];
+                if (field === 'budget') {
+                    updates.minBudget = parseFloat(body.budget.min);
+                    updates.maxBudget = parseFloat(body.budget.max);
+                    updates.currency = body.budget.currency || 'FCFA';
+                } else if (field === 'deadline') {
+                    updates.deadline = new Date(body.deadline);
+                } else {
+                    updates[field] = body[field];
+                }
             }
         }
 
-        const updatedProject = await Project.findByIdAndUpdate(
-            projectId,
-            updates,
-            { new: true }
-        );
+        const updatedProject = await prisma.project.update({
+            where: { id: projectId },
+            data: updates,
+        });
+
+        // Format response
+        const formattedProject = {
+            ...updatedProject,
+            budget: {
+                min: updatedProject.minBudget,
+                max: updatedProject.maxBudget,
+                currency: updatedProject.currency
+            }
+        };
 
         return NextResponse.json(
             {
                 success: true,
                 message: 'Projet mis à jour',
-                project: updatedProject,
+                project: formattedProject,
             },
             { status: 200 }
         );
@@ -152,10 +175,10 @@ export async function DELETE(request, { params }) {
             );
         }
 
-        await connectDB();
-
         const projectId = params.id;
-        const project = await Project.findById(projectId);
+        const project = await prisma.project.findUnique({
+            where: { id: projectId }
+        });
 
         if (!project) {
             return NextResponse.json(
@@ -165,16 +188,20 @@ export async function DELETE(request, { params }) {
         }
 
         // Verify ownership
-        if (project.companyId.toString() !== session.user.id) {
+        if (project.companyId !== session.user.id) {
             return NextResponse.json(
                 { error: 'Vous n\'êtes pas autorisé à supprimer ce projet' },
                 { status: 403 }
             );
         }
 
-        // Delete project and all applications
-        await ProjectApplication.deleteMany({ projectId: project._id });
-        await Project.findByIdAndDelete(projectId);
+        // Delete project (cascade delete will handle applications and reviews if configured in schema)
+        // In our schema: 
+        // ProjectApplication -> onDelete: Cascade
+        // Review -> onDelete: Cascade
+        await prisma.project.delete({
+            where: { id: projectId }
+        });
 
         return NextResponse.json(
             {

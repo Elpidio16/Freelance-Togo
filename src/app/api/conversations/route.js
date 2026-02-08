@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import connectDB from '@/lib/mongodb';
-import Conversation from '@/models/Conversation';
-import User from '@/models/User';
+import prisma from '@/lib/prisma';
 
 // GET /api/conversations - Get all user's conversations
 export async function GET(request) {
@@ -14,36 +12,66 @@ export async function GET(request) {
             return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
         }
 
-        await connectDB();
-
-        const conversations = await Conversation.find({
-            participants: session.user.id,
-        })
-            .populate('participants', 'firstName lastName email role')
-            .populate('projectId', 'title')
-            .sort({ lastMessageAt: -1 });
+        const conversations = await prisma.conversation.findMany({
+            where: {
+                participants: {
+                    some: {
+                        id: session.user.id
+                    }
+                }
+            },
+            include: {
+                participants: {
+                    select: {
+                        id: true,
+                        firstName: true,
+                        lastName: true,
+                        email: true,
+                        role: true,
+                        image: true
+                    }
+                },
+                project: {
+                    select: {
+                        id: true,
+                        title: true
+                    }
+                }
+            },
+            orderBy: {
+                lastMessageAt: 'desc'
+            }
+        });
 
         const conversationsWithDetails = conversations.map((conv) => {
             // Get the other participant
             const otherParticipant = conv.participants.find(
-                (p) => p._id.toString() !== session.user.id
+                (p) => p.id !== session.user.id
             );
 
+            // Handle unreadCount (JSON)
+            let unread = 0;
+            if (conv.unreadCount && typeof conv.unreadCount === 'object') {
+                unread = conv.unreadCount[session.user.id] || 0;
+            }
+
             return {
-                _id: conv._id,
-                otherUser: {
-                    id: otherParticipant._id,
+                _id: conv.id,
+                id: conv.id,
+                otherUser: otherParticipant ? {
+                    id: otherParticipant.id,
                     name: `${otherParticipant.firstName} ${otherParticipant.lastName}`,
                     email: otherParticipant.email,
                     role: otherParticipant.role,
-                },
-                project: conv.projectId ? {
-                    id: conv.projectId._id,
-                    title: conv.projectId.title,
+                    image: otherParticipant.image
+                } : null,
+                project: conv.project ? {
+                    id: conv.project.id,
+                    title: conv.project.title,
                 } : null,
                 lastMessage: conv.lastMessage,
                 lastMessageAt: conv.lastMessageAt,
-                unreadCount: conv.getUnreadCount(session.user.id),
+                unreadCount: unread,
             };
         });
 
@@ -67,8 +95,6 @@ export async function POST(request) {
             return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
         }
 
-        await connectDB();
-
         const body = await request.json();
         const { otherUserId, projectId } = body;
 
@@ -79,33 +105,54 @@ export async function POST(request) {
             );
         }
 
-        // Check if conversation already exists
-        const existingConversation = await Conversation.findOne({
-            participants: { $all: [session.user.id, otherUserId] },
+        // Check if conversation already exists between these two users
+        // Prisma: findFirst where participants has every [session.user.id, otherUserId]
+        // This is tricky in Prisma many-to-many.
+        // Alternative: Find conversations where user 1 is participant AND user 2 is participant.
+        const existingConversation = await prisma.conversation.findFirst({
+            where: {
+                AND: [
+                    { participants: { some: { id: session.user.id } } },
+                    { participants: { some: { id: otherUserId } } }
+                ]
+            }
         });
 
         if (existingConversation) {
+            // If projecId is provided and different? Usually conversation is unique per pair regardless of project, 
+            // but schema has projectId. If existing conversation has different project, do we create new?
+            // Mongoose logic: `participants: { $all: ... }` implies finding ONE convo with these participants.
+            // It ignored projectId for uniqueness check in original code, just returned if found.
             return NextResponse.json(
-                { conversation: existingConversation },
+                { conversation: { ...existingConversation, _id: existingConversation.id, id: existingConversation.id } },
                 { status: 200 }
             );
         }
 
         // Create new conversation
-        const conversation = await Conversation.create({
-            participants: [session.user.id, otherUserId],
-            projectId: projectId || null,
-            unreadCount: new Map([
-                [session.user.id, 0],
-                [otherUserId, 0],
-            ]),
+        const conversation = await prisma.conversation.create({
+            data: {
+                participants: {
+                    connect: [
+                        { id: session.user.id },
+                        { id: otherUserId }
+                    ]
+                },
+                projectId: projectId || null,
+                unreadCount: {
+                    [session.user.id]: 0,
+                    [otherUserId]: 0
+                },
+                lastMessage: '',
+                lastMessageAt: new Date() // Default
+            }
         });
 
         return NextResponse.json(
             {
                 success: true,
                 message: 'Conversation créée',
-                conversation,
+                conversation: { ...conversation, _id: conversation.id, id: conversation.id },
             },
             { status: 201 }
         );

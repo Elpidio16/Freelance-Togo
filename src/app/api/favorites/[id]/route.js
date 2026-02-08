@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import connectDB from '@/lib/mongodb';
-import Favorite from '@/models/Favorite';
+import prisma from '@/lib/prisma';
 
 // DELETE /api/favorites/[id] - Remove from favorites
 export async function DELETE(request, { params }) {
@@ -20,12 +19,12 @@ export async function DELETE(request, { params }) {
             );
         }
 
-        await connectDB();
-
         const favoriteId = params.id;
 
         // Find and verify ownership
-        const favorite = await Favorite.findById(favoriteId);
+        const favorite = await prisma.favorite.findUnique({
+            where: { id: favoriteId }
+        });
 
         if (!favorite) {
             return NextResponse.json(
@@ -34,14 +33,16 @@ export async function DELETE(request, { params }) {
             );
         }
 
-        if (favorite.companyId.toString() !== session.user.id) {
+        if (favorite.companyId !== session.user.id) {
             return NextResponse.json(
                 { error: 'Accès refusé' },
                 { status: 403 }
             );
         }
 
-        await Favorite.findByIdAndDelete(favoriteId);
+        await prisma.favorite.delete({
+            where: { id: favoriteId }
+        });
 
         return NextResponse.json(
             {
@@ -76,14 +77,14 @@ export async function PUT(request, { params }) {
             );
         }
 
-        await connectDB();
-
         const favoriteId = params.id;
         const body = await request.json();
         const { poolName, notes } = body;
 
         // Find and verify ownership
-        const favorite = await Favorite.findById(favoriteId);
+        const favorite = await prisma.favorite.findUnique({
+            where: { id: favoriteId }
+        });
 
         if (!favorite) {
             return NextResponse.json(
@@ -92,7 +93,7 @@ export async function PUT(request, { params }) {
             );
         }
 
-        if (favorite.companyId.toString() !== session.user.id) {
+        if (favorite.companyId !== session.user.id) {
             return NextResponse.json(
                 { error: 'Accès refusé' },
                 { status: 403 }
@@ -100,16 +101,20 @@ export async function PUT(request, { params }) {
         }
 
         // Update
-        if (poolName !== undefined) favorite.poolName = poolName;
-        if (notes !== undefined) favorite.notes = notes;
+        const data = {};
+        if (poolName !== undefined) data.poolName = poolName;
+        if (notes !== undefined) data.notes = notes;
 
-        await favorite.save();
+        const updatedFavorite = await prisma.favorite.update({
+            where: { id: favoriteId },
+            data
+        });
 
         return NextResponse.json(
             {
                 success: true,
                 message: 'Favori mis à jour',
-                favorite,
+                favorite: updatedFavorite,
             },
             { status: 200 }
         );

@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import connectDB from '@/lib/mongodb';
-import Notification from '@/models/Notification';
+import prisma from '@/lib/prisma';
 
 // GET /api/notifications - Get user's notifications
 export async function GET(request) {
@@ -13,24 +12,26 @@ export async function GET(request) {
             return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
         }
 
-        await connectDB();
-
         const { searchParams } = new URL(request.url);
         const unreadOnly = searchParams.get('unreadOnly') === 'true';
         const limit = parseInt(searchParams.get('limit') || '50');
 
-        const query = { userId: session.user.id };
+        const where = { userId: session.user.id };
         if (unreadOnly) {
-            query.read = false;
+            where.read = false;
         }
 
-        const notifications = await Notification.find(query)
-            .sort({ createdAt: -1 })
-            .limit(limit);
+        const notifications = await prisma.notification.findMany({
+            where,
+            orderBy: { createdAt: 'desc' },
+            take: limit
+        });
 
-        const unreadCount = await Notification.countDocuments({
-            userId: session.user.id,
-            read: false,
+        const unreadCount = await prisma.notification.count({
+            where: {
+                userId: session.user.id,
+                read: false,
+            }
         });
 
         return NextResponse.json({
@@ -56,8 +57,6 @@ export async function POST(request) {
             return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
         }
 
-        await connectDB();
-
         const body = await request.json();
         const { userId, type, title, message, link, metadata } = body;
 
@@ -68,13 +67,16 @@ export async function POST(request) {
             );
         }
 
-        const notification = await Notification.create({
-            userId,
-            type,
-            title,
-            message,
-            link: link || '',
-            metadata: metadata || {},
+        const notification = await prisma.notification.create({
+            data: {
+                userId,
+                type,
+                title,
+                message,
+                link: link || '',
+                metadata: metadata || {}, // Prisma handles JSON automatically
+                read: false
+            }
         });
 
         return NextResponse.json(

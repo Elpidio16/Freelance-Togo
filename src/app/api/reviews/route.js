@@ -1,10 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import connectDB from '@/lib/mongodb';
-import Review from '@/models/Review';
-import Project from '@/models/Project';
-import FreelanceProfile from '@/models/FreelanceProfile';
+import prisma from '@/lib/prisma';
 
 // POST /api/reviews - Create a review (company only, after project completion)
 export async function POST(request) {
@@ -21,8 +18,6 @@ export async function POST(request) {
                 { status: 403 }
             );
         }
-
-        await connectDB();
 
         const body = await request.json();
         const {
@@ -50,7 +45,9 @@ export async function POST(request) {
         }
 
         // Verify project exists and is completed
-        const project = await Project.findById(projectId);
+        const project = await prisma.project.findUnique({
+            where: { id: projectId }
+        });
 
         if (!project) {
             return NextResponse.json(
@@ -60,7 +57,7 @@ export async function POST(request) {
         }
 
         // Verify company owns the project
-        if (project.companyId.toString() !== session.user.id) {
+        if (project.companyId !== session.user.id) {
             return NextResponse.json(
                 { error: 'Vous ne pouvez pas évaluer ce projet' },
                 { status: 403 }
@@ -76,7 +73,9 @@ export async function POST(request) {
         }
 
         // Check if review already exists
-        const existingReview = await Review.findOne({ projectId });
+        const existingReview = await prisma.review.findUnique({
+            where: { projectId: projectId }
+        });
 
         if (existingReview) {
             return NextResponse.json(
@@ -86,27 +85,37 @@ export async function POST(request) {
         }
 
         // Create review
-        const review = await Review.create({
-            projectId,
-            freelanceId,
-            companyId: session.user.id,
-            rating,
-            comment: comment.trim(),
-            skillsRating: skillsRating || {},
-            wouldRecommend: wouldRecommend !== undefined ? wouldRecommend : true,
+        const review = await prisma.review.create({
+            data: {
+                projectId,
+                freelanceId,
+                companyId: session.user.id,
+                rating,
+                comment: comment.trim(),
+                skillsRating: skillsRating || {},
+                wouldRecommend: wouldRecommend !== undefined ? wouldRecommend : true,
+            }
         });
 
         // Update freelance profile rating
-        const reviews = await Review.find({ freelanceId });
-        const avgRating = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
+        const allReviews = await prisma.review.findMany({
+            where: { freelanceId },
+            select: { rating: true }
+        });
 
-        await FreelanceProfile.findOneAndUpdate(
-            { userId: freelanceId },
-            {
-                rating: Math.round(avgRating * 10) / 10, // Round to 1 decimal
-                reviewCount: reviews.length,
+        const totalReviews = allReviews.length;
+        const avgRating = totalReviews > 0
+            ? allReviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews
+            : 0;
+
+        await prisma.freelanceProfile.update({
+            where: { userId: freelanceId },
+            data: {
+                averageRating: Math.round(avgRating * 10) / 10, // Round to 1 decimal
+                totalReviews: totalReviews,
+                // completedProjects could be incremented here if not done elsewhere
             }
-        );
+        });
 
         return NextResponse.json(
             {
@@ -120,7 +129,7 @@ export async function POST(request) {
     } catch (error) {
         console.error('Erreur POST /api/reviews:', error);
 
-        if (error.code === 11000) {
+        if (error.code === 'P2002') { // Unique constraint violation in Prisma
             return NextResponse.json(
                 { error: 'Vous avez déjà évalué ce projet' },
                 { status: 400 }

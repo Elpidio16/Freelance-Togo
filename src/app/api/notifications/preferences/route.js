@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import connectDB from '@/lib/mongodb';
 import { getNotificationPreferences, updateNotificationPreferences } from '@/lib/notifications';
 
 // GET /api/notifications/preferences
@@ -15,8 +14,6 @@ export async function GET(request) {
                 { status: 401 }
             );
         }
-
-        await connectDB();
 
         const preferences = await getNotificationPreferences(session.user.id);
 
@@ -49,8 +46,6 @@ export async function PUT(request) {
                 { status: 401 }
             );
         }
-
-        await connectDB();
 
         const body = await request.json();
         const { emailNotifications, emailPreferences, inAppNotifications, emailDigest } = body;
