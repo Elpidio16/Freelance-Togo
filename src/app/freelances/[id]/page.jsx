@@ -94,7 +94,7 @@ export default function FreelanceProfilePage() {
                         <div className={styles.headerInfo}>
                             <h1>{freelance.name}</h1>
                             <p className={styles.jobTitle}>{freelance.title}</p>
-                            <div className={styles.location}>📍 {freelance.city}, Togo</div>
+                            <p className={styles.category}>📂 {freelance.category}</p>
                             <div className={styles.rating}>
                                 <span className={styles.stars}>⭐ {freelance.rating}</span>
                                 <span className={styles.reviews}>({freelance.reviews} avis)</span>

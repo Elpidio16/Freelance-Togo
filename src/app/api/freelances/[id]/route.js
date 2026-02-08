@@ -39,19 +39,21 @@ export async function GET(request, { params }) {
             name: `${profile.user.firstName} ${profile.user.lastName}`,
             title: profile.title,
             bio: profile.bio,
+            category: profile.category,
             image: profile.profileImage || null,
             rating: profile.averageRating || 0,
             reviews: profile.totalReviews || 0,
             hourlyRate: profile.hourlyRate || 0,
             dailyRate: profile.dailyRate || 0,
-            city: profile.city, // Profile has city in Prisma
             skills: profile.skills || [],
             availability: profile.availability || 'disponible',
             completedProjects: profile.completedProjects || 0,
-            portfolio: profile.portfolio || [], // JSON
-            experience: profile.experience || [], // JSON
-            education: profile.education || [], // JSON
-            languages: profile.languages || [], // JSON
+            portfolio: profile.portfolio || [],
+            experience: profile.experience || [],
+            education: profile.education || [],
+            languages: profile.languages || [],
+            certifications: profile.certifications || [],
+            socialLinks: profile.socialLinks || {},
         };
 
         return NextResponse.json({ freelance }, { status: 200 });
