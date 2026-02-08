@@ -1,7 +1,9 @@
 import { Resend } from 'resend';
 import emailTemplates from './email-templates';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = process.env.RESEND_API_KEY
+  ? new Resend(process.env.RESEND_API_KEY)
+  : { emails: { send: async () => ({ error: { message: 'RESEND_API_KEY is missing' } }) } };
 const FROM_EMAIL = process.env.EMAIL_FROM || 'IngeniHub <noreply@ingenihub.com>';
 
 /**
